@@ -25,10 +25,10 @@ export class ToolRegistry {
     if (this.tools.has(name)) {
       console.warn(`Tool '${name}' is already registered. Overwriting.`);
     }
-    
+
     this.tools.set(name, tool);
     this.metadata.set(name, { ...metadata, name });
-    
+
     console.log(`Registered tool: ${name}`);
   }
 
@@ -61,7 +61,7 @@ export class ToolRegistry {
    * Get all tools with a specific capability
    */
   getToolsWithCapability(capability: string): ToolMetadata[] {
-    return Array.from(this.metadata.values()).filter(metadata => 
+    return Array.from(this.metadata.values()).filter((metadata) =>
       metadata.capabilities.includes(capability)
     );
   }
@@ -79,9 +79,9 @@ export class ToolRegistry {
  */
 export function createToolRegistry(): ToolRegistry {
   const registry = new ToolRegistry();
-  
+
   // Tool registration will happen here
   // This will be populated as we refactor existing tools
-  
+
   return registry;
-} 
+}

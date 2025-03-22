@@ -96,19 +96,19 @@ export class AgentPlanner {
   private parsePlanFromText(text: string): Omit<Plan, 'id'> {
     // Find the JSON object in the text
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    
+
     if (!jsonMatch) {
       throw new Error('No JSON object found in the response');
     }
-    
+
     const jsonString = jsonMatch[0];
     const parsed = JSON.parse(jsonString);
-    
+
     // Validate the plan structure
     if (!parsed.goal || !parsed.steps || !Array.isArray(parsed.steps)) {
       throw new Error('Invalid plan structure');
     }
-    
+
     // Ensure each step has required fields
     parsed.steps = parsed.steps.map((step: any) => ({
       id: step.id || generateUUID(),
@@ -118,7 +118,7 @@ export class AgentPlanner {
       dependsOn: Array.isArray(step.dependsOn) ? step.dependsOn : [],
       expectedOutcome: step.expectedOutcome || 'No expected outcome specified'
     }));
-    
+
     return {
       goal: parsed.goal,
       reasoning: parsed.reasoning || 'No reasoning provided',
@@ -144,4 +144,4 @@ export class AgentPlanner {
       ]
     };
   }
-} 
+}

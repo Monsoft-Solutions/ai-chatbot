@@ -66,14 +66,14 @@ export class AgentReflection {
   private parseReflectionFromText(text: string): Reflection {
     // Find the JSON object in the text
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    
+
     if (!jsonMatch) {
       throw new Error('No JSON object found in the response');
     }
-    
+
     const jsonString = jsonMatch[0];
     const parsed = JSON.parse(jsonString);
-    
+
     // Validate and normalize the reflection
     return {
       success: typeof parsed.success === 'boolean' ? parsed.success : false,
@@ -94,4 +94,4 @@ export class AgentReflection {
       feedback: 'Unable to generate proper reflection due to an error.'
     };
   }
-} 
+}

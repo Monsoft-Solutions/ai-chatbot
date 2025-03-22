@@ -28,8 +28,8 @@ export class AgentMemory {
    * Store execution results in memory
    */
   async storeExecution(
-    request: string, 
-    plan: Plan, 
+    request: string,
+    plan: Plan,
     executionResult: any,
     reflection: any
   ): Promise<string> {
@@ -50,10 +50,10 @@ export class AgentMemory {
 
     // Store in long-term memory
     this.longTermMemory.set(entry.id, entry);
-    
+
     // Persist to database if needed
     // await this.persistMemory(entry);
-    
+
     return entry.id;
   }
 
@@ -77,10 +77,10 @@ export class AgentMemory {
   async retrieveRelevantContext(request: string): Promise<any> {
     // In a future implementation, this would use embeddings or another
     // technique to find semantically relevant past memories
-    
+
     // For now, simply return recent memories
     return {
-      recentMemories: this.shortTermMemory,
+      recentMemories: this.shortTermMemory
       // Additional context could be added here
     };
   }
@@ -112,4 +112,4 @@ export function getGlobalMemory(): AgentMemory {
     globalMemoryInstance = new AgentMemory();
   }
   return globalMemoryInstance;
-} 
+}

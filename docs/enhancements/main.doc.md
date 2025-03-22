@@ -300,7 +300,7 @@ Various components, including `components/message.tsx`
 <Button
   data-testid="message-edit-button"
   variant="ghost"
-  className="text-muted-foreground h-fit rounded-full px-2 opacity-0 group-hover/message:opacity-100"
+  className="h-fit rounded-full px-2 text-muted-foreground opacity-0 group-hover/message:opacity-100"
   onClick={() => {
     setMode('edit');
   }}
