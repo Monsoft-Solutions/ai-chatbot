@@ -12,7 +12,7 @@ export const imageArtifact = new Artifact({
         ...draftArtifact,
         content: streamPart.content as string,
         isVisible: true,
-        status: 'streaming',
+        status: 'streaming'
       }));
     }
   },
@@ -30,7 +30,7 @@ export const imageArtifact = new Artifact({
         }
 
         return false;
-      },
+      }
     },
     {
       icon: <RedoIcon size={18} />,
@@ -44,7 +44,7 @@ export const imageArtifact = new Artifact({
         }
 
         return false;
-      },
+      }
     },
     {
       icon: <CopyIcon size={18} />,
@@ -61,16 +61,14 @@ export const imageArtifact = new Artifact({
           ctx?.drawImage(img, 0, 0);
           canvas.toBlob((blob) => {
             if (blob) {
-              navigator.clipboard.write([
-                new ClipboardItem({ 'image/png': blob }),
-              ]);
+              navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
             }
           }, 'image/png');
         };
 
         toast.success('Copied image to clipboard!');
-      },
-    },
+      }
+    }
   ],
-  toolbar: [],
+  toolbar: []
 });

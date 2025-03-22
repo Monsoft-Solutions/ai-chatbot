@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { memo } from 'react';
-import { UseChatHelpers } from '@ai-sdk/react';
+import type { UseChatHelpers } from '@ai-sdk/react';
 
 interface SuggestedActionsProps {
   chatId: string;
@@ -15,30 +15,27 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
     {
       title: 'What are the advantages',
       label: 'of using Next.js?',
-      action: 'What are the advantages of using Next.js?',
+      action: 'What are the advantages of using Next.js?'
     },
     {
       title: 'Write code to',
       label: `demonstrate djikstra's algorithm`,
-      action: `Write code to demonstrate djikstra's algorithm`,
+      action: `Write code to demonstrate djikstra's algorithm`
     },
     {
       title: 'Help me write an essay',
       label: `about silicon valley`,
-      action: `Help me write an essay about silicon valley`,
+      action: `Help me write an essay about silicon valley`
     },
     {
       title: 'What is the weather',
       label: 'in San Francisco?',
-      action: 'What is the weather in San Francisco?',
-    },
+      action: 'What is the weather in San Francisco?'
+    }
   ];
 
   return (
-    <div
-      data-testid="suggested-actions"
-      className="grid sm:grid-cols-2 gap-2 w-full"
-    >
+    <div data-testid="suggested-actions" className="grid w-full gap-2 sm:grid-cols-2">
       {suggestedActions.map((suggestedAction, index) => (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -55,15 +52,13 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
 
               append({
                 role: 'user',
-                content: suggestedAction.action,
+                content: suggestedAction.action
               });
             }}
-            className="text-left border rounded-xl px-4 py-3.5 text-sm flex-1 gap-1 sm:flex-col w-full h-auto justify-start items-start"
+            className="h-auto w-full flex-1 items-start justify-start gap-1 rounded-xl border px-4 py-3.5 text-left text-sm sm:flex-col"
           >
             <span className="font-medium">{suggestedAction.title}</span>
-            <span className="text-muted-foreground">
-              {suggestedAction.label}
-            </span>
+            <span className="text-muted-foreground">{suggestedAction.label}</span>
           </Button>
         </motion.div>
       ))}

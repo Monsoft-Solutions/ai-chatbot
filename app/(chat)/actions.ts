@@ -1,14 +1,14 @@
 'use server';
 
-import { generateText, Message } from 'ai';
+import { generateText, type Message } from 'ai';
 import { cookies } from 'next/headers';
 
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getMessageById,
-  updateChatVisiblityById,
+  updateChatVisiblityById
 } from '@/lib/db/queries';
-import { VisibilityType } from '@/components/visibility-selector';
+import type { VisibilityType } from '@/components/visibility-selector';
 import { myProvider } from '@/lib/ai/providers';
 
 export async function saveChatModelAsCookie(model: string) {
@@ -16,11 +16,7 @@ export async function saveChatModelAsCookie(model: string) {
   cookieStore.set('chat-model', model);
 }
 
-export async function generateTitleFromUserMessage({
-  message,
-}: {
-  message: Message;
-}) {
+export async function generateTitleFromUserMessage({ message }: { message: Message }) {
   const { text: title } = await generateText({
     model: myProvider.languageModel('title-model'),
     system: `\n
@@ -28,7 +24,7 @@ export async function generateTitleFromUserMessage({
     - ensure it is not more than 80 characters long
     - the title should be a summary of the user's message
     - do not use quotes or colons`,
-    prompt: JSON.stringify(message),
+    prompt: JSON.stringify(message)
   });
 
   return title;
@@ -39,13 +35,13 @@ export async function deleteTrailingMessages({ id }: { id: string }) {
 
   await deleteMessagesByChatIdAfterTimestamp({
     chatId: message.chatId,
-    timestamp: message.createdAt,
+    timestamp: message.createdAt
   });
 }
 
 export async function updateChatVisibility({
   chatId,
-  visibility,
+  visibility
 }: {
   chatId: string;
   visibility: VisibilityType;

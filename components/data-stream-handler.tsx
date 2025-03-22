@@ -2,8 +2,8 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useRef } from 'react';
-import { artifactDefinitions, ArtifactKind } from './artifact';
-import { Suggestion } from '@/lib/db/schema';
+import { artifactDefinitions, type ArtifactKind } from './artifact';
+import type { Suggestion } from '@/lib/db/schema';
 import { initialArtifactData, useArtifact } from '@/hooks/use-artifact';
 
 export type DataStreamDelta = {
@@ -34,14 +34,14 @@ export function DataStreamHandler({ id }: { id: string }) {
 
     (newDeltas as DataStreamDelta[]).forEach((delta: DataStreamDelta) => {
       const artifactDefinition = artifactDefinitions.find(
-        (artifactDefinition) => artifactDefinition.kind === artifact.kind,
+        (artifactDefinition) => artifactDefinition.kind === artifact.kind
       );
 
       if (artifactDefinition?.onStreamPart) {
         artifactDefinition.onStreamPart({
           streamPart: delta,
           setArtifact,
-          setMetadata,
+          setMetadata
         });
       }
 
@@ -55,34 +55,34 @@ export function DataStreamHandler({ id }: { id: string }) {
             return {
               ...draftArtifact,
               documentId: delta.content as string,
-              status: 'streaming',
+              status: 'streaming'
             };
 
           case 'title':
             return {
               ...draftArtifact,
               title: delta.content as string,
-              status: 'streaming',
+              status: 'streaming'
             };
 
           case 'kind':
             return {
               ...draftArtifact,
               kind: delta.content as ArtifactKind,
-              status: 'streaming',
+              status: 'streaming'
             };
 
           case 'clear':
             return {
               ...draftArtifact,
               content: '',
-              status: 'streaming',
+              status: 'streaming'
             };
 
           case 'finish':
             return {
               ...draftArtifact,
-              status: 'idle',
+              status: 'idle'
             };
 
           default:

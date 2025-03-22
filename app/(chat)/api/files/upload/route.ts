@@ -9,12 +9,12 @@ const FileSchema = z.object({
   file: z
     .instanceof(Blob)
     .refine((file) => file.size <= 5 * 1024 * 1024, {
-      message: 'File size should be less than 5MB',
+      message: 'File size should be less than 5MB'
     })
     // Update the file type based on the kind of files you want to accept
     .refine((file) => ['image/jpeg', 'image/png'].includes(file.type), {
-      message: 'File type should be JPEG or PNG',
-    }),
+      message: 'File type should be JPEG or PNG'
+    })
 });
 
 export async function POST(request: Request) {
@@ -39,9 +39,7 @@ export async function POST(request: Request) {
     const validatedFile = FileSchema.safeParse({ file });
 
     if (!validatedFile.success) {
-      const errorMessage = validatedFile.error.errors
-        .map((error) => error.message)
-        .join(', ');
+      const errorMessage = validatedFile.error.errors.map((error) => error.message).join(', ');
 
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
@@ -52,7 +50,7 @@ export async function POST(request: Request) {
 
     try {
       const data = await put(`${filename}`, fileBuffer, {
-        access: 'public',
+        access: 'public'
       });
 
       return NextResponse.json(data);
@@ -60,9 +58,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
     }
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to process request' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
   }
 }

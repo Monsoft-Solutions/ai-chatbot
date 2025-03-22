@@ -7,7 +7,7 @@ import { defineConfig, devices } from '@playwright/test';
 import { config } from 'dotenv';
 
 config({
-  path: '.env.local',
+  path: '.env.local'
 });
 
 /* Use process.env.PORT by default and fallback to port 3000 */
@@ -40,20 +40,20 @@ export default defineConfig({
     baseURL,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: 'on-first-retry'
   },
 
   /* Configure global timeout for each test */
   timeout: 60 * 1000, // 30 seconds
   expect: {
-    timeout: 60 * 1000,
+    timeout: 60 * 1000
   },
 
   /* Configure projects */
   projects: [
     {
       name: 'setup:auth',
-      testMatch: /auth.setup.ts/,
+      testMatch: /auth.setup.ts/
     },
     {
       name: 'setup:reasoning',
@@ -61,8 +61,8 @@ export default defineConfig({
       dependencies: ['setup:auth'],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: 'playwright/.auth/session.json',
-      },
+        storageState: 'playwright/.auth/session.json'
+      }
     },
     {
       name: 'chat',
@@ -70,8 +70,8 @@ export default defineConfig({
       dependencies: ['setup:auth'],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: 'playwright/.auth/session.json',
-      },
+        storageState: 'playwright/.auth/session.json'
+      }
     },
     {
       name: 'reasoning',
@@ -79,8 +79,8 @@ export default defineConfig({
       dependencies: ['setup:reasoning'],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: 'playwright/.reasoning/session.json',
-      },
+        storageState: 'playwright/.reasoning/session.json'
+      }
     },
     {
       name: 'artifacts',
@@ -88,9 +88,9 @@ export default defineConfig({
       dependencies: ['setup:auth'],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: 'playwright/.auth/session.json',
-      },
-    },
+        storageState: 'playwright/.auth/session.json'
+      }
+    }
 
     // {
     //   name: 'firefox',
@@ -128,6 +128,6 @@ export default defineConfig({
     command: 'pnpm dev',
     url: baseURL,
     timeout: 120 * 1000,
-    reuseExistingServer: !process.env.CI,
-  },
+    reuseExistingServer: !process.env.CI
+  }
 });

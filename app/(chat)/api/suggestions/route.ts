@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   }
 
   const suggestions = await getSuggestionsByDocumentId({
-    documentId,
+    documentId
   });
 
   const [suggestion] = suggestions;

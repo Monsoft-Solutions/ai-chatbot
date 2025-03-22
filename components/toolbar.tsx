@@ -1,35 +1,23 @@
 'use client';
-
-import type { Message } from 'ai';
 import cx from 'classnames';
-import {
-  AnimatePresence,
-  motion,
-  useMotionValue,
-  useTransform,
-} from 'framer-motion';
+import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import {
   type Dispatch,
   memo,
-  ReactNode,
+  type ReactNode,
   type SetStateAction,
   useEffect,
   useRef,
-  useState,
+  useState
 } from 'react';
 import { useOnClickOutside } from 'usehooks-ts';
 import { nanoid } from 'nanoid';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 import { ArrowUpIcon, StopIcon, SummarizeIcon } from './icons';
-import { artifactDefinitions, ArtifactKind } from './artifact';
-import { ArtifactToolbarItem } from './create-artifact';
-import { UseChatHelpers } from '@ai-sdk/react';
+import { artifactDefinitions, type ArtifactKind } from './artifact';
+import type { ArtifactToolbarItem } from './create-artifact';
+import type { UseChatHelpers } from '@ai-sdk/react';
 
 type ToolProps = {
   description: string;
@@ -40,11 +28,7 @@ type ToolProps = {
   setIsToolbarVisible?: Dispatch<SetStateAction<boolean>>;
   isAnimating: boolean;
   append: UseChatHelpers['append'];
-  onClick: ({
-    appendMessage,
-  }: {
-    appendMessage: UseChatHelpers['append'];
-  }) => void;
+  onClick: ({ appendMessage }: { appendMessage: UseChatHelpers['append'] }) => void;
 };
 
 const Tool = ({
@@ -56,7 +40,7 @@ const Tool = ({
   setIsToolbarVisible,
   isAnimating,
   append,
-  onClick,
+  onClick
 }: ToolProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -90,8 +74,8 @@ const Tool = ({
     <Tooltip open={isHovered && !isAnimating}>
       <TooltipTrigger asChild>
         <motion.div
-          className={cx('p-3 rounded-full', {
-            'bg-primary !text-primary-foreground': selectedTool === description,
+          className={cx('rounded-full p-3', {
+            'bg-primary !text-primary-foreground': selectedTool === description
           })}
           onHoverStart={() => {
             setIsHovered(true);
@@ -111,7 +95,7 @@ const Tool = ({
           exit={{
             scale: 0.9,
             opacity: 0,
-            transition: { duration: 0.1 },
+            transition: { duration: 0.1 }
           }}
           onClick={() => {
             handleSelect();
@@ -123,7 +107,7 @@ const Tool = ({
       <TooltipContent
         side="left"
         sideOffset={16}
-        className="bg-foreground text-background rounded-2xl p-3 px-4"
+        className="rounded-2xl bg-foreground p-3 px-4 text-background"
       >
         {description}
       </TooltipContent>
@@ -136,7 +120,7 @@ const randomArr = [...Array(6)].map((x) => nanoid(5));
 const ReadingLevelSelector = ({
   setSelectedTool,
   append,
-  isAnimating,
+  isAnimating
 }: {
   setSelectedTool: Dispatch<SetStateAction<string | null>>;
   isAnimating: boolean;
@@ -148,7 +132,7 @@ const ReadingLevelSelector = ({
     'Keep current level',
     'High School',
     'College',
-    'Graduate',
+    'Graduate'
   ];
 
   const y = useMotionValue(-40 * 2);
@@ -156,8 +140,7 @@ const ReadingLevelSelector = ({
   const yToLevel = useTransform(y, [0, -dragConstraints], [0, 5]);
 
   const [currentLevel, setCurrentLevel] = useState(2);
-  const [hasUserSelectedLevel, setHasUserSelectedLevel] =
-    useState<boolean>(false);
+  const [hasUserSelectedLevel, setHasUserSelectedLevel] = useState<boolean>(false);
 
   useEffect(() => {
     const unsubscribe = yToLevel.on('change', (latest) => {
@@ -169,11 +152,11 @@ const ReadingLevelSelector = ({
   }, [yToLevel]);
 
   return (
-    <div className="relative flex flex-col justify-end items-center">
+    <div className="relative flex flex-col items-center justify-end">
       {randomArr.map((id) => (
         <motion.div
           key={id}
-          className="size-[40px] flex flex-row items-center justify-center"
+          className="flex size-[40px] flex-row items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -188,11 +171,11 @@ const ReadingLevelSelector = ({
           <TooltipTrigger asChild>
             <motion.div
               className={cx(
-                'absolute bg-background p-3 border rounded-full flex flex-row items-center',
+                'absolute flex flex-row items-center rounded-full border bg-background p-3',
                 {
                   'bg-primary text-primary-foreground': currentLevel !== 2,
-                  'bg-background text-foreground': currentLevel === 2,
-                },
+                  'bg-background text-foreground': currentLevel === 2
+                }
               )}
               style={{ y }}
               drag="y"
@@ -216,7 +199,7 @@ const ReadingLevelSelector = ({
                 if (currentLevel !== 2 && hasUserSelectedLevel) {
                   append({
                     role: 'user',
-                    content: `Please adjust the reading level to ${LEVELS[currentLevel]} level.`,
+                    content: `Please adjust the reading level to ${LEVELS[currentLevel]} level.`
                   });
 
                   setSelectedTool(null);
@@ -229,7 +212,7 @@ const ReadingLevelSelector = ({
           <TooltipContent
             side="left"
             sideOffset={16}
-            className="bg-foreground text-background text-sm rounded-2xl p-3 px-4"
+            className="rounded-2xl bg-foreground p-3 px-4 text-sm text-background"
           >
             {LEVELS[currentLevel]}
           </TooltipContent>
@@ -246,7 +229,7 @@ export const Tools = ({
   append,
   isAnimating,
   setIsToolbarVisible,
-  tools,
+  tools
 }: {
   isToolbarVisible: boolean;
   selectedTool: string | null;
@@ -303,7 +286,7 @@ const PureToolbar = ({
   status,
   stop,
   setMessages,
-  artifactKind,
+  artifactKind
 }: {
   isToolbarVisible: boolean;
   setIsToolbarVisible: Dispatch<SetStateAction<boolean>>;
@@ -356,7 +339,7 @@ const PureToolbar = ({
   }, [status, setIsToolbarVisible]);
 
   const artifactDefinition = artifactDefinitions.find(
-    (definition) => definition.kind === artifactKind,
+    (definition) => definition.kind === artifactKind
   );
 
   if (!artifactDefinition) {
@@ -372,7 +355,7 @@ const PureToolbar = ({
   return (
     <TooltipProvider delayDuration={0}>
       <motion.div
-        className="cursor-pointer absolute right-6 bottom-6 p-1.5 border rounded-full shadow-lg bg-background flex flex-col justify-end"
+        className="absolute bottom-6 right-6 flex cursor-pointer flex-col justify-end rounded-full border bg-background p-1.5 shadow-lg"
         initial={{ opacity: 0, y: -20, scale: 1 }}
         animate={
           isToolbarVisible
@@ -382,14 +365,14 @@ const PureToolbar = ({
                   y: 0,
                   height: 6 * 43,
                   transition: { delay: 0 },
-                  scale: 0.95,
+                  scale: 0.95
                 }
               : {
                   opacity: 1,
                   y: 0,
                   height: toolsByArtifactKind.length * 50,
                   transition: { delay: 0 },
-                  scale: 1,
+                  scale: 1
                 }
             : { opacity: 1, y: 0, height: 54, transition: { delay: 0 } }
         }

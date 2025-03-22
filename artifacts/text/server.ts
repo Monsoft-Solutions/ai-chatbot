@@ -13,7 +13,7 @@ export const textDocumentHandler = createDocumentHandler<'text'>({
       system:
         'Write about the given topic. Markdown is supported. Use headings wherever appropriate.',
       experimental_transform: smoothStream({ chunking: 'word' }),
-      prompt: title,
+      prompt: title
     });
 
     for await (const delta of fullStream) {
@@ -26,7 +26,7 @@ export const textDocumentHandler = createDocumentHandler<'text'>({
 
         dataStream.writeData({
           type: 'text-delta',
-          content: textDelta,
+          content: textDelta
         });
       }
     }
@@ -45,10 +45,10 @@ export const textDocumentHandler = createDocumentHandler<'text'>({
         openai: {
           prediction: {
             type: 'content',
-            content: document.content,
-          },
-        },
-      },
+            content: document.content
+          }
+        }
+      }
     });
 
     for await (const delta of fullStream) {
@@ -60,11 +60,11 @@ export const textDocumentHandler = createDocumentHandler<'text'>({
         draftContent += textDelta;
         dataStream.writeData({
           type: 'text-delta',
-          content: textDelta,
+          content: textDelta
         });
       }
     }
 
     return draftContent;
-  },
+  }
 });

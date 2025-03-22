@@ -10,21 +10,21 @@ import { buildContentFromDocument } from './functions';
 
 export const documentSchema = new Schema({
   nodes: addListNodes(schema.spec.nodes, 'paragraph block*', 'block'),
-  marks: schema.spec.marks,
+  marks: schema.spec.marks
 });
 
 export function headingRule(level: number) {
   return textblockTypeInputRule(
     new RegExp(`^(#{1,${level}})\\s$`),
     documentSchema.nodes.heading,
-    () => ({ level }),
+    () => ({ level })
   );
 }
 
 export const handleTransaction = ({
   transaction,
   editorRef,
-  onSaveContent,
+  onSaveContent
 }: {
   transaction: Transaction;
   editorRef: MutableRefObject<EditorView | null>;

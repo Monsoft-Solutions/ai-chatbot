@@ -7,16 +7,16 @@ export const chatModel = new MockLanguageModelV1({
     rawCall: { rawPrompt: null, rawSettings: {} },
     finishReason: 'stop',
     usage: { promptTokens: 10, completionTokens: 20 },
-    text: `Hello, world!`,
+    text: `Hello, world!`
   }),
   doStream: async ({ prompt }) => ({
     stream: simulateReadableStream({
       chunkDelayInMs: 50,
       initialDelayInMs: 100,
-      chunks: getResponseChunksByPrompt(prompt),
+      chunks: getResponseChunksByPrompt(prompt)
     }),
-    rawCall: { rawPrompt: null, rawSettings: {} },
-  }),
+    rawCall: { rawPrompt: null, rawSettings: {} }
+  })
 });
 
 export const reasoningModel = new MockLanguageModelV1({
@@ -24,16 +24,16 @@ export const reasoningModel = new MockLanguageModelV1({
     rawCall: { rawPrompt: null, rawSettings: {} },
     finishReason: 'stop',
     usage: { promptTokens: 10, completionTokens: 20 },
-    text: `Hello, world!`,
+    text: `Hello, world!`
   }),
   doStream: async ({ prompt }) => ({
     stream: simulateReadableStream({
       chunkDelayInMs: 50,
       initialDelayInMs: 500,
-      chunks: getResponseChunksByPrompt(prompt, true),
+      chunks: getResponseChunksByPrompt(prompt, true)
     }),
-    rawCall: { rawPrompt: null, rawSettings: {} },
-  }),
+    rawCall: { rawPrompt: null, rawSettings: {} }
+  })
 });
 
 export const titleModel = new MockLanguageModelV1({
@@ -41,7 +41,7 @@ export const titleModel = new MockLanguageModelV1({
     rawCall: { rawPrompt: null, rawSettings: {} },
     finishReason: 'stop',
     usage: { promptTokens: 10, completionTokens: 20 },
-    text: `This is a test title`,
+    text: `This is a test title`
   }),
   doStream: async () => ({
     stream: simulateReadableStream({
@@ -53,12 +53,12 @@ export const titleModel = new MockLanguageModelV1({
           type: 'finish',
           finishReason: 'stop',
           logprobs: undefined,
-          usage: { completionTokens: 10, promptTokens: 3 },
-        },
-      ],
+          usage: { completionTokens: 10, promptTokens: 3 }
+        }
+      ]
     }),
-    rawCall: { rawPrompt: null, rawSettings: {} },
-  }),
+    rawCall: { rawPrompt: null, rawSettings: {} }
+  })
 });
 
 export const artifactModel = new MockLanguageModelV1({
@@ -66,14 +66,14 @@ export const artifactModel = new MockLanguageModelV1({
     rawCall: { rawPrompt: null, rawSettings: {} },
     finishReason: 'stop',
     usage: { promptTokens: 10, completionTokens: 20 },
-    text: `Hello, world!`,
+    text: `Hello, world!`
   }),
   doStream: async ({ prompt }) => ({
     stream: simulateReadableStream({
       chunkDelayInMs: 50,
       initialDelayInMs: 100,
-      chunks: getResponseChunksByPrompt(prompt),
+      chunks: getResponseChunksByPrompt(prompt)
     }),
-    rawCall: { rawPrompt: null, rawSettings: {} },
-  }),
+    rawCall: { rawPrompt: null, rawSettings: {} }
+  })
 });

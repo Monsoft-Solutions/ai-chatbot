@@ -10,8 +10,5 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "typescript.tsdk": "node_modules/typescript/lib",
-  "eslint.workingDirectories": [
-    { "pattern": "app/*" },
-    { "pattern": "packages/*" }
-  ]
+  "eslint.workingDirectories": [{ "pattern": "app/*" }, { "pattern": "packages/*" }]
 }

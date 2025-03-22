@@ -1,21 +1,16 @@
 'use client';
 
-import { ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
-import {
-  CheckCircleFillIcon,
-  ChevronDownIcon,
-  GlobeIcon,
-  LockIcon,
-} from './icons';
+import { CheckCircleFillIcon, ChevronDownIcon, GlobeIcon, LockIcon } from './icons';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 
 export type VisibilityType = 'private' | 'public';
@@ -30,20 +25,20 @@ const visibilities: Array<{
     id: 'private',
     label: 'Private',
     description: 'Only you can access this chat',
-    icon: <LockIcon />,
+    icon: <LockIcon />
   },
   {
     id: 'public',
     label: 'Public',
     description: 'Anyone with the link can access this chat',
-    icon: <GlobeIcon />,
-  },
+    icon: <GlobeIcon />
+  }
 ];
 
 export function VisibilitySelector({
   chatId,
   className,
-  selectedVisibilityType,
+  selectedVisibilityType
 }: {
   chatId: string;
   selectedVisibilityType: VisibilityType;
@@ -52,12 +47,12 @@ export function VisibilitySelector({
 
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId,
-    initialVisibility: selectedVisibilityType,
+    initialVisibility: selectedVisibilityType
   });
 
   const selectedVisibility = useMemo(
     () => visibilities.find((visibility) => visibility.id === visibilityType),
-    [visibilityType],
+    [visibilityType]
   );
 
   return (
@@ -66,13 +61,10 @@ export function VisibilitySelector({
         asChild
         className={cn(
           'w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
-          className,
+          className
         )}
       >
-        <Button
-          variant="outline"
-          className="hidden md:flex md:px-2 md:h-[34px]"
-        >
+        <Button variant="outline" className="hidden md:flex md:h-[34px] md:px-2">
           {selectedVisibility?.icon}
           {selectedVisibility?.label}
           <ChevronDownIcon />
@@ -87,18 +79,16 @@ export function VisibilitySelector({
               setVisibilityType(visibility.id);
               setOpen(false);
             }}
-            className="gap-4 group/item flex flex-row justify-between items-center"
+            className="group/item flex flex-row items-center justify-between gap-4"
             data-active={visibility.id === visibilityType}
           >
-            <div className="flex flex-col gap-1 items-start">
+            <div className="flex flex-col items-start gap-1">
               {visibility.label}
               {visibility.description && (
-                <div className="text-xs text-muted-foreground">
-                  {visibility.description}
-                </div>
+                <div className="text-xs text-muted-foreground">{visibility.description}</div>
               )}
             </div>
-            <div className="text-foreground dark:text-foreground opacity-0 group-data-[active=true]/item:opacity-100">
+            <div className="text-foreground opacity-0 group-data-[active=true]/item:opacity-100 dark:text-foreground">
               <CheckCircleFillIcon />
             </div>
           </DropdownMenuItem>

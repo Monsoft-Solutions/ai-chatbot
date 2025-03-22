@@ -6,7 +6,7 @@ export class ReactRenderer {
     root.render(component);
 
     return {
-      destroy: () => root.unmount(),
+      destroy: () => root.unmount()
     };
   }
 }

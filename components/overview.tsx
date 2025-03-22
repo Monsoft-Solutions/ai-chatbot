@@ -7,14 +7,14 @@ export const Overview = () => {
   return (
     <motion.div
       key="overview"
-      className="max-w-3xl mx-auto md:mt-20"
+      className="mx-auto max-w-3xl md:mt-20"
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ delay: 0.5 }}
     >
-      <div className="rounded-xl p-6 flex flex-col gap-8 leading-relaxed text-center max-w-xl">
-        <p className="flex flex-row justify-center gap-4 items-center">
+      <div className="flex max-w-xl flex-col gap-8 rounded-xl p-6 text-center leading-relaxed">
+        <p className="flex flex-row items-center justify-center gap-4">
           <VercelIcon size={32} />
           <span>+</span>
           <MessageIcon size={32} />
@@ -28,12 +28,10 @@ export const Overview = () => {
           >
             open source
           </Link>{' '}
-          chatbot template built with Next.js and the AI SDK by Vercel. It uses
-          the{' '}
-          <code className="rounded-md bg-muted px-1 py-0.5">streamText</code>{' '}
-          function in the server and the{' '}
-          <code className="rounded-md bg-muted px-1 py-0.5">useChat</code> hook
-          on the client to create a seamless chat experience.
+          chatbot template built with Next.js and the AI SDK by Vercel. It uses the{' '}
+          <code className="rounded-md bg-muted px-1 py-0.5">streamText</code> function in the server
+          and the <code className="rounded-md bg-muted px-1 py-0.5">useChat</code> hook on the
+          client to create a seamless chat experience.
         </p>
         <p>
           You can learn more about the AI SDK by visiting the{' '}

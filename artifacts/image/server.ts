@@ -10,14 +10,14 @@ export const imageDocumentHandler = createDocumentHandler<'image'>({
     const { image } = await experimental_generateImage({
       model: myProvider.imageModel('small-model'),
       prompt: title,
-      n: 1,
+      n: 1
     });
 
     draftContent = image.base64;
 
     dataStream.writeData({
       type: 'image-delta',
-      content: image.base64,
+      content: image.base64
     });
 
     return draftContent;
@@ -28,16 +28,16 @@ export const imageDocumentHandler = createDocumentHandler<'image'>({
     const { image } = await experimental_generateImage({
       model: myProvider.imageModel('small-model'),
       prompt: description,
-      n: 1,
+      n: 1
     });
 
     draftContent = image.base64;
 
     dataStream.writeData({
       type: 'image-delta',
-      content: image.base64,
+      content: image.base64
     });
 
     return draftContent;
-  },
+  }
 });

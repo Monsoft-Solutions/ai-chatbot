@@ -23,7 +23,7 @@ const PureSpreadsheetEditor = ({
   content,
   saveContent,
   status,
-  isCurrentVersion,
+  isCurrentVersion
 }: SheetEditorProps) => {
   const { theme } = useTheme();
 
@@ -54,7 +54,7 @@ const PureSpreadsheetEditor = ({
       width: 50,
       renderCell: ({ rowIdx }: { rowIdx: number }) => rowIdx + 1,
       cellClass: 'border-t border-r dark:bg-zinc-950 dark:text-zinc-50',
-      headerCellClass: 'border-t border-r dark:bg-zinc-900 dark:text-zinc-50',
+      headerCellClass: 'border-t border-r dark:bg-zinc-900 dark:text-zinc-50'
     };
 
     const dataColumns = Array.from({ length: MIN_COLS }, (_, i) => ({
@@ -63,11 +63,11 @@ const PureSpreadsheetEditor = ({
       renderEditCell: textEditor,
       width: 120,
       cellClass: cn(`border-t dark:bg-zinc-950 dark:text-zinc-50`, {
-        'border-l': i !== 0,
+        'border-l': i !== 0
       }),
       headerCellClass: cn(`border-t dark:bg-zinc-900 dark:text-zinc-50`, {
-        'border-l': i !== 0,
-      }),
+        'border-l': i !== 0
+      })
     }));
 
     return [rowNumberColumn, ...dataColumns];
@@ -77,7 +77,7 @@ const PureSpreadsheetEditor = ({
     return parseData.map((row, rowIndex) => {
       const rowData: any = {
         id: rowIndex,
-        rowNumber: rowIndex + 1,
+        rowNumber: rowIndex + 1
       };
 
       columns.slice(1).forEach((col, colIndex) => {
@@ -124,7 +124,7 @@ const PureSpreadsheetEditor = ({
       style={{ height: '100%' }}
       defaultColumnOptions={{
         resizable: true,
-        sortable: true,
+        sortable: true
       }}
     />
   );

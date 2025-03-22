@@ -22,7 +22,7 @@ interface VersionFooterProps {
 export const VersionFooter = ({
   handleVersionChange,
   documents,
-  currentVersionIndex,
+  currentVersionIndex
 }: VersionFooterProps) => {
   const { artifact } = useArtifact();
 
@@ -36,7 +36,7 @@ export const VersionFooter = ({
 
   return (
     <motion.div
-      className="absolute flex flex-col gap-4 lg:flex-row bottom-0 bg-background p-4 w-full border-t z-50 justify-between"
+      className="absolute bottom-0 z-50 flex w-full flex-col justify-between gap-4 border-t bg-background p-4 lg:flex-row"
       initial={{ y: isMobile ? 200 : 77 }}
       animate={{ y: 0 }}
       exit={{ y: isMobile ? 200 : 77 }}
@@ -44,9 +44,7 @@ export const VersionFooter = ({
     >
       <div>
         <div>You are viewing a previous version</div>
-        <div className="text-muted-foreground text-sm">
-          Restore this version to make edits
-        </div>
+        <div className="text-sm text-muted-foreground">Restore this version to make edits</div>
       </div>
 
       <div className="flex flex-row gap-4">
@@ -60,11 +58,8 @@ export const VersionFooter = ({
               await fetch(`/api/document?id=${artifact.documentId}`, {
                 method: 'PATCH',
                 body: JSON.stringify({
-                  timestamp: getDocumentTimestampByIndex(
-                    documents,
-                    currentVersionIndex,
-                  ),
-                }),
+                  timestamp: getDocumentTimestampByIndex(documents, currentVersionIndex)
+                })
               }),
               {
                 optimisticData: documents
@@ -72,17 +67,12 @@ export const VersionFooter = ({
                       ...documents.filter((document) =>
                         isAfter(
                           new Date(document.createdAt),
-                          new Date(
-                            getDocumentTimestampByIndex(
-                              documents,
-                              currentVersionIndex,
-                            ),
-                          ),
-                        ),
-                      ),
+                          new Date(getDocumentTimestampByIndex(documents, currentVersionIndex))
+                        )
+                      )
                     ]
-                  : [],
-              },
+                  : []
+              }
             );
           }}
         >

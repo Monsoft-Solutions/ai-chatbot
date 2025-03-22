@@ -1,14 +1,14 @@
 'use client';
 
 import { updateChatVisibility } from '@/app/(chat)/actions';
-import { VisibilityType } from '@/components/visibility-selector';
-import { Chat } from '@/lib/db/schema';
+import type { VisibilityType } from '@/components/visibility-selector';
+import type { Chat } from '@/lib/db/schema';
 import { useMemo } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 
 export function useChatVisibility({
   chatId,
-  initialVisibility,
+  initialVisibility
 }: {
   chatId: string;
   initialVisibility: VisibilityType;
@@ -20,8 +20,8 @@ export function useChatVisibility({
     `${chatId}-visibility`,
     null,
     {
-      fallbackData: initialVisibility,
-    },
+      fallbackData: initialVisibility
+    }
   );
 
   const visibilityType = useMemo(() => {
@@ -42,19 +42,19 @@ export function useChatVisibility({
               if (chat.id === chatId) {
                 return {
                   ...chat,
-                  visibility: updatedVisibilityType,
+                  visibility: updatedVisibilityType
                 };
               }
               return chat;
             })
           : [];
       },
-      { revalidate: false },
+      { revalidate: false }
     );
 
     updateChatVisibility({
       chatId: chatId,
-      visibility: updatedVisibilityType,
+      visibility: updatedVisibilityType
     });
   };
 

@@ -1,23 +1,14 @@
 import {
-  UIMessage,
+  type UIMessage,
   appendResponseMessages,
   createDataStreamResponse,
   smoothStream,
-  streamText,
+  streamText
 } from 'ai';
 import { auth } from '@/app/(auth)/auth';
 import { systemPrompt } from '@/lib/ai/prompts';
-import {
-  deleteChatById,
-  getChatById,
-  saveChat,
-  saveMessages,
-} from '@/lib/db/queries';
-import {
-  generateUUID,
-  getMostRecentUserMessage,
-  getTrailingMessageId,
-} from '@/lib/utils';
+import { deleteChatById, getChatById, saveChat, saveMessages } from '@/lib/db/queries';
+import { generateUUID, getMostRecentUserMessage, getTrailingMessageId } from '@/lib/utils';
 import { generateTitleFromUserMessage } from '../../actions';
 import { createDocument } from '@/lib/ai/tools/create-document';
 import { updateDocument } from '@/lib/ai/tools/update-document';
@@ -33,7 +24,7 @@ export async function POST(request: Request) {
     const {
       id,
       messages,
-      selectedChatModel,
+      selectedChatModel
     }: {
       id: string;
       messages: Array<UIMessage>;
@@ -56,7 +47,7 @@ export async function POST(request: Request) {
 
     if (!chat) {
       const title = await generateTitleFromUserMessage({
-        message: userMessage,
+        message: userMessage
       });
 
       await saveChat({ id, userId: session.user.id, title });
@@ -74,9 +65,9 @@ export async function POST(request: Request) {
           role: 'user',
           parts: userMessage.parts,
           attachments: userMessage.experimental_attachments ?? [],
-          createdAt: new Date(),
-        },
-      ],
+          createdAt: new Date()
+        }
+      ]
     });
 
     return createDataStreamResponse({
@@ -89,12 +80,7 @@ export async function POST(request: Request) {
           experimental_activeTools:
             selectedChatModel === 'chat-model-reasoning'
               ? []
-              : [
-                  'getWeather',
-                  'createDocument',
-                  'updateDocument',
-                  'requestSuggestions',
-                ],
+              : ['getWeather', 'createDocument', 'updateDocument', 'requestSuggestions'],
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
           tools: {
@@ -103,16 +89,14 @@ export async function POST(request: Request) {
             updateDocument: updateDocument({ session, dataStream }),
             requestSuggestions: requestSuggestions({
               session,
-              dataStream,
-            }),
+              dataStream
+            })
           },
           onFinish: async ({ response }) => {
             if (session.user?.id) {
               try {
                 const assistantId = getTrailingMessageId({
-                  messages: response.messages.filter(
-                    (message) => message.role === 'assistant',
-                  ),
+                  messages: response.messages.filter((message) => message.role === 'assistant')
                 });
 
                 if (!assistantId) {
@@ -121,7 +105,7 @@ export async function POST(request: Request) {
 
                 const [, assistantMessage] = appendResponseMessages({
                   messages: [userMessage],
-                  responseMessages: response.messages,
+                  responseMessages: response.messages
                 });
 
                 await saveMessages({
@@ -131,11 +115,10 @@ export async function POST(request: Request) {
                       chatId: id,
                       role: assistantMessage.role,
                       parts: assistantMessage.parts,
-                      attachments:
-                        assistantMessage.experimental_attachments ?? [],
-                      createdAt: new Date(),
-                    },
-                  ],
+                      attachments: assistantMessage.experimental_attachments ?? [],
+                      createdAt: new Date()
+                    }
+                  ]
                 });
               } catch (_) {
                 console.error('Failed to save chat');
@@ -144,24 +127,24 @@ export async function POST(request: Request) {
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
-            functionId: 'stream-text',
-          },
+            functionId: 'stream-text'
+          }
         });
 
         result.consumeStream();
 
         result.mergeIntoDataStream(dataStream, {
-          sendReasoning: true,
+          sendReasoning: true
         });
       },
       onError: () => {
         return 'Oops, an error occured!';
-      },
+      }
     });
   } catch (error) {
-    console.error(`Error While processig the request`, error)
+    console.error(`Error While processig the request`, error);
     return new Response('An error occurred while processing your request!', {
-      status: 500,
+      status: 500
     });
   }
 }
@@ -192,7 +175,7 @@ export async function DELETE(request: Request) {
     return new Response('Chat deleted', { status: 200 });
   } catch (error) {
     return new Response('An error occurred while processing your request!', {
-      status: 500,
+      status: 500
     });
   }
 }

@@ -1,11 +1,8 @@
 import { generateUUID } from '@/lib/utils';
-import { DataStreamWriter, tool } from 'ai';
+import { type DataStreamWriter, tool } from 'ai';
 import { z } from 'zod';
-import { Session } from 'next-auth';
-import {
-  artifactKinds,
-  documentHandlersByArtifactKind,
-} from '@/lib/artifacts/server';
+import type { Session } from 'next-auth';
+import { artifactKinds, documentHandlersByArtifactKind } from '@/lib/artifacts/server';
 
 interface CreateDocumentProps {
   session: Session;
@@ -18,34 +15,33 @@ export const createDocument = ({ session, dataStream }: CreateDocumentProps) =>
       'Create a document for a writing or content creation activities. This tool will call other functions that will generate the contents of the document based on the title and kind.',
     parameters: z.object({
       title: z.string(),
-      kind: z.enum(artifactKinds),
+      kind: z.enum(artifactKinds)
     }),
     execute: async ({ title, kind }) => {
       const id = generateUUID();
 
       dataStream.writeData({
         type: 'kind',
-        content: kind,
+        content: kind
       });
 
       dataStream.writeData({
         type: 'id',
-        content: id,
+        content: id
       });
 
       dataStream.writeData({
         type: 'title',
-        content: title,
+        content: title
       });
 
       dataStream.writeData({
         type: 'clear',
-        content: '',
+        content: ''
       });
 
       const documentHandler = documentHandlersByArtifactKind.find(
-        (documentHandlerByArtifactKind) =>
-          documentHandlerByArtifactKind.kind === kind,
+        (documentHandlerByArtifactKind) => documentHandlerByArtifactKind.kind === kind
       );
 
       if (!documentHandler) {
@@ -56,7 +52,7 @@ export const createDocument = ({ session, dataStream }: CreateDocumentProps) =>
         id,
         title,
         dataStream,
-        session,
+        session
       });
 
       dataStream.writeData({ type: 'finish', content: '' });
@@ -65,7 +61,7 @@ export const createDocument = ({ session, dataStream }: CreateDocumentProps) =>
         id,
         title,
         kind,
-        content: 'A document was created and is now visible to the user.',
+        content: 'A document was created and is now visible to the user.'
       };
-    },
+    }
   });
