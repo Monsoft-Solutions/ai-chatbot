@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         hostname: 'avatar.vercel.sh'
+      },
+      {
+        hostname: '*'
       }
     ]
   }

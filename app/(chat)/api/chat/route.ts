@@ -16,6 +16,7 @@ import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { getWeather } from '@/lib/ai/tools/get-weather';
 import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
+import { searchTool } from '@/lib/ai/tools/search.ai-tool';
 
 export const maxDuration = 60;
 
@@ -72,6 +73,8 @@ export async function POST(request: Request) {
 
     return createDataStreamResponse({
       execute: (dataStream) => {
+        console.log(`Executing chat with model: ${selectedChatModel}`);
+        console.log('messages', messages);
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
           system: systemPrompt({ selectedChatModel }),
@@ -80,7 +83,13 @@ export async function POST(request: Request) {
           experimental_activeTools:
             selectedChatModel === 'chat-model-reasoning'
               ? []
-              : ['getWeather', 'createDocument', 'updateDocument', 'requestSuggestions'],
+              : [
+                  'getWeather',
+                  'createDocument',
+                  'updateDocument',
+                  'requestSuggestions',
+                  'search_the_web'
+                ],
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
           tools: {
@@ -90,7 +99,8 @@ export async function POST(request: Request) {
             requestSuggestions: requestSuggestions({
               session,
               dataStream
-            })
+            }),
+            search_the_web: searchTool
           },
           onFinish: async ({ response }) => {
             if (session.user?.id) {

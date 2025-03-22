@@ -4,5 +4,5 @@
  * @returns The sanitized URL
  */
 export function sanitizeUrl(url: string): string {
-    return url.replace(/\s+/g, '%20')
-  }
+  return url.replace(/\s+/g, '%20');
+}
