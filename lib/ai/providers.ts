@@ -15,13 +15,13 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
-        'chat-model': anthropic('claude-3-5-haiku-20241022'),
+        'chat-model': anthropic('claude-3-7-sonnet-latest'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: anthropic('claude-3-5-haiku-20241022'),
+          model: anthropic('claude-3-7-sonnet-latest'),
           middleware: extractReasoningMiddleware({ tagName: 'think' })
         }),
         'title-model': anthropic('claude-3-haiku-20240307'),
-        'artifact-model': anthropic('claude-3-5-haiku-20241022')
+        'artifact-model': anthropic('claude-3-7-sonnet-latest')
       },
       imageModels: {
         'small-model': openai.image('dall-e-3')
