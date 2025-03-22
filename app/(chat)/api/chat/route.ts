@@ -17,6 +17,7 @@ import { getWeather } from '@/lib/ai/tools/get-weather';
 import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
 import { searchTool } from '@/lib/ai/tools/search.ai-tool';
+import { thinkTool } from '@/lib/ai/tools/think.ai-tool';
 
 export const maxDuration = 60;
 
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
           model: myProvider.languageModel(selectedChatModel),
           system: systemPrompt({ selectedChatModel }),
           messages,
-          maxSteps: 5,
+          maxSteps: 10,
           experimental_activeTools:
             selectedChatModel === 'chat-model-reasoning'
               ? []
@@ -88,7 +89,8 @@ export async function POST(request: Request) {
                   'createDocument',
                   'updateDocument',
                   'requestSuggestions',
-                  'search_the_web'
+                  'search_the_web',
+                  'think'
                 ],
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
@@ -100,8 +102,10 @@ export async function POST(request: Request) {
               session,
               dataStream
             }),
-            search_the_web: searchTool
+            search_the_web: searchTool,
+            think: thinkTool
           },
+          toolCallStreaming: true,
           onFinish: async ({ response }) => {
             if (session.user?.id) {
               try {
