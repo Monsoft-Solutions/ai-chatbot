@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the implementation of a TypeScript SDK for the AI Chatbot platform. The SDK provides third-party developers with a type-safe, developer-friendly way to integrate with the AI Chatbot API.
+This document outlines the implementation of a TypeScript SDK for the VernisAI platform. The SDK provides third-party developers with a type-safe, developer-friendly way to integrate with the VernisAI API.
 
 ## Goals
 
@@ -55,12 +55,12 @@ export interface ClientOptions {
 }
 
 export function createClient(options: ClientOptions) {
-  const { apiKey, baseUrl = 'https://api.aichatbot.com', timeout = 30000 } = options;
+  const { apiKey, baseUrl = 'https://app.vernis.ai/api', timeout = 30000 } = options;
 
   const client = createTRPCProxyClient<AppRouter>({
     links: [
       httpBatchLink({
-        url: `${baseUrl}/api/trpc`,
+        url: `${baseUrl}/trpc`,
         headers: () => ({
           Authorization: `Bearer ${apiKey}`
         }),
@@ -234,8 +234,8 @@ export function createSDKClient(options: ClientOptions) {
       streamMessages: (conversationId: string, options: any = {}) => {
         return createStream({
           apiKey: options.apiKey,
-          baseUrl: options.baseUrl || 'https://api.aichatbot.com',
-          endpoint: `/api/conversations/${conversationId}/messages/stream`,
+          baseUrl: options.baseUrl || 'https://app.vernis.ai/api',
+          endpoint: `/conversations/${conversationId}/messages/stream`,
           onMessage: options.onMessage,
           onError: options.onError,
           onComplete: options.onComplete,
@@ -249,8 +249,8 @@ export function createSDKClient(options: ClientOptions) {
       streamRun: (agentId: string, input: string, options: any = {}) => {
         return createStream({
           apiKey: options.apiKey,
-          baseUrl: options.baseUrl || 'https://api.aichatbot.com',
-          endpoint: `/api/agents/${agentId}/run/stream`,
+          baseUrl: options.baseUrl || 'https://app.vernis.ai/api',
+          endpoint: `/agents/${agentId}/run/stream`,
           onMessage: options.onMessage,
           onError: options.onError,
           onComplete: options.onComplete,
@@ -321,9 +321,9 @@ Package.json configuration:
 
 ```json
 {
-  "name": "@aichatbot/sdk",
+  "name": "@vernisai/sdk",
   "version": "1.0.0",
-  "description": "TypeScript SDK for AI Chatbot",
+  "description": "TypeScript SDK for VernisAI",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": ["dist", "README.md"],
@@ -349,7 +349,7 @@ Package.json configuration:
 ### Basic Usage
 
 ```typescript
-import { createClient } from '@aichatbot/sdk';
+import { createClient } from '@vernisai/sdk';
 
 // Initialize client
 const client = createClient({
@@ -385,7 +385,7 @@ async function sendMessage(conversationId: string, content: string) {
 ### Streaming Example
 
 ```typescript
-import { createClient } from '@aichatbot/sdk';
+import { createClient } from '@vernisai/sdk';
 
 const client = createClient({
   apiKey: 'your_api_key'
@@ -428,7 +428,7 @@ function streamAgentExecution(agentId: string, input: string) {
 ### Error Handling
 
 ```typescript
-import { createClient, APIError } from '@aichatbot/sdk';
+import { createClient, APIError } from '@vernisai/sdk';
 
 const client = createClient({
   apiKey: 'your_api_key'
@@ -481,7 +481,7 @@ async function generateDocs() {
   await generateDocumentation({
     entryPoints: [resolve(__dirname, '../packages/sdk/src/index.ts')],
     out: resolve(__dirname, '../docs/sdk'),
-    name: 'AI Chatbot SDK',
+    name: 'VernisAI SDK',
     excludePrivate: true,
     excludeProtected: true,
     excludeExternals: true
@@ -504,7 +504,7 @@ import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 
 const server = setupServer(
-  rest.get('https://api.aichatbot.com/api/trpc/conversations.list', (req, res, ctx) => {
+  rest.get('https://app.vernis.ai/api/trpc/conversations.list', (req, res, ctx) => {
     const auth = req.headers.get('authorization');
 
     if (auth !== 'Bearer test_api_key') {

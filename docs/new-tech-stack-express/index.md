@@ -1,6 +1,6 @@
-# AI Chatbot Technical Documentation
+# VernisAI Technical Documentation
 
-This documentation outlines the architecture, implementation details, and development guidelines for the AI Chatbot application. It provides a comprehensive overview of the system's components, their interactions, and best practices for development.
+This documentation outlines the architecture, implementation details, and development guidelines for the VernisAI application. It provides a comprehensive overview of the system's components, their interactions, and best practices for development.
 
 ## Documentation Sections
 
@@ -128,4 +128,4 @@ For new developers joining the project, we recommend starting with the [Technica
 
 ## Contact
 
-For questions or clarifications about the documentation, please contact the development team at development@aichatbot.com.
+For questions or clarifications about the documentation, please contact the development team at development@vernis.ai.

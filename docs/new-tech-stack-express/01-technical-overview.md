@@ -1,8 +1,8 @@
-# Technical Overview: AI Chatbot with tRPC
+# Technical Overview: VernisAI with tRPC
 
 ## Feature Overview
 
-The AI Chatbot is a sophisticated application that enables users to interact with AI models through both simple chat interfaces and complex agent-based workflows. The system supports multiple organizations, each with their own set of users, and allows for the creation and management of custom AI agents that can perform specific tasks.
+VernisAI is a sophisticated application that enables users to interact with AI models through both simple chat interfaces and complex agent-based workflows. The system supports multiple organizations, each with their own set of users, and allows for the creation and management of custom AI agents that can perform specific tasks.
 
 ### Key Features
 
@@ -15,7 +15,7 @@ The AI Chatbot is a sophisticated application that enables users to interact wit
 
 ## Architecture Overview
 
-The AI Chatbot application is built on a modern serverless architecture using TypeScript, tRPC, and Supabase. The application is designed to be deployed as serverless functions, providing excellent scalability and cost efficiency.
+VernisAI application is built on a modern serverless architecture using TypeScript, tRPC, and Supabase. The application is designed to be deployed as serverless functions, providing excellent scalability and cost efficiency.
 
 ```
 ┌───────────────────────┐
@@ -166,9 +166,9 @@ The tRPC API will be documented using OpenAPI specifications:
 import { generateOpenApiDocument } from 'trpc-openapi';
 
 export const openApiDocument = generateOpenApiDocument(appRouter, {
-  title: 'AI Chatbot API',
+  title: 'VernisAI API',
   version: '1.0.0',
-  baseUrl: 'https://api.example.com'
+  baseUrl: 'https://app.vernis.ai/api'
 });
 ```
 

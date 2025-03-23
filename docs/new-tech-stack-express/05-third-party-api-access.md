@@ -2,11 +2,11 @@
 
 ## Overview
 
-This document outlines how third-party clients can integrate with the AI Chatbot API. The API is built using tRPC with OpenAPI support, providing both type-safe TypeScript access and standard REST endpoints for any programming language.
+This document outlines how third-party clients can integrate with the VernisAI API. The API is built using tRPC with OpenAPI support, providing both type-safe TypeScript access and standard REST endpoints for any programming language.
 
 ## API Architecture
 
-The AI Chatbot API follows a modern, secure architecture:
+The VernisAI API follows a modern, secure architecture:
 
 ```
 ┌────────────────────┐
@@ -69,11 +69,11 @@ import { generateOpenApiDocument } from 'trpc-openapi';
 import { appRouter } from './router';
 
 export const openApiDocument = generateOpenApiDocument(appRouter, {
-  title: 'AI Chatbot API',
-  description: 'API for the AI Chatbot application',
+  title: 'VernisAI API',
+  description: 'API for the VernisAI application',
   version: '1.0.0',
-  baseUrl: 'https://api.aichatbot.com',
-  docsUrl: 'https://docs.aichatbot.com',
+  baseUrl: 'https://app.vernis.ai/api',
+  docsUrl: 'https://docs.vernis.ai',
   tags: ['chat', 'agents', 'organizations', 'users']
 });
 ```
@@ -145,7 +145,7 @@ The API is organized into logical groups:
 
 ```http
 POST /api/conversations HTTP/1.1
-Host: api.aichatbot.com
+Host: app.vernis.ai
 Authorization: Bearer {api_key}
 Content-Type: application/json
 
@@ -160,7 +160,7 @@ Content-Type: application/json
 
 ```http
 POST /api/conversations/conv_123456789/messages HTTP/1.1
-Host: api.aichatbot.com
+Host: app.vernis.ai
 Authorization: Bearer {api_key}
 Content-Type: application/json
 
@@ -174,7 +174,7 @@ Content-Type: application/json
 
 ```http
 POST /api/agents/agent_123456789/run HTTP/1.1
-Host: api.aichatbot.com
+Host: app.vernis.ai
 Authorization: Bearer {api_key}
 Content-Type: application/json
 
@@ -191,7 +191,7 @@ The API supports Server-Sent Events (SSE) for streaming responses from AI models
 ```javascript
 // Browser example
 const eventSource = new EventSource(
-  'https://api.aichatbot.com/api/conversations/conv_123/messages/stream',
+  'https://app.vernis.ai/api/conversations/conv_123/messages/stream',
   {
     headers: {
       Authorization: 'Bearer ' + apiKey
@@ -227,7 +227,7 @@ Third-party applications can subscribe to webhook events:
 
 ```http
 POST /api/webhooks HTTP/1.1
-Host: api.aichatbot.com
+Host: app.vernis.ai
 Authorization: Bearer {api_key}
 Content-Type: application/json
 
@@ -296,7 +296,7 @@ Common error codes:
 The API follows semantic versioning through URL path versioning:
 
 ```
-https://api.aichatbot.com/v1/conversations
+https://app.vernis.ai/api/v1/conversations
 ```
 
 Major versions introduce breaking changes. The current stable version is v1.
@@ -326,13 +326,13 @@ Major versions introduce breaking changes. The current stable version is v1.
 For TypeScript applications, a dedicated SDK provides type-safe API access:
 
 ```typescript
-// Installation: npm install @aichatbot/sdk
+// Installation: npm install @vernisai/sdk
 
-import { createClient } from '@aichatbot/sdk';
+import { createClient } from '@vernisai/sdk';
 
 const client = createClient({
   apiKey: 'your_api_key',
-  baseUrl: 'https://api.aichatbot.com'
+  baseUrl: 'https://app.vernis.ai/api'
 });
 
 // Type-safe API access
@@ -353,15 +353,15 @@ For local development and testing:
 
 1. **API Key Generation**: Generate development API keys in the dashboard
 2. **Local Webhook Testing**: Use tools like ngrok to receive webhooks locally
-3. **API Sandbox**: Test against the sandbox environment at `https://sandbox-api.aichatbot.com`
+3. **API Sandbox**: Test against the sandbox environment at `https://sandbox.vernis.ai`
 
 ## Support and Documentation
 
-- **API Reference**: Full API reference at https://docs.aichatbot.com/api
-- **SDK Documentation**: SDK-specific documentation at https://docs.aichatbot.com/sdk
-- **Support**: Developer support at developers@aichatbot.com
-- **Status Page**: Service status at https://status.aichatbot.com
+- **API Reference**: Full API reference at https://docs.vernis.ai/api
+- **SDK Documentation**: SDK-specific documentation at https://docs.vernis.ai/sdk
+- **Support**: Developer support at developers@vernis.ai
+- **Status Page**: Service status at https://status.vernis.ai
 
 ## Conclusion
 
-The AI Chatbot API provides a robust, secure, and developer-friendly way to integrate AI capabilities into third-party applications. By supporting both tRPC for TypeScript applications and OpenAPI/REST for any language, the API caters to a wide range of integration scenarios while maintaining high security and performance standards.
+The VernisAI API provides a robust, secure, and developer-friendly way to integrate AI capabilities into third-party applications. By supporting both tRPC for TypeScript applications and OpenAPI/REST for any language, the API caters to a wide range of integration scenarios while maintaining high security and performance standards.
