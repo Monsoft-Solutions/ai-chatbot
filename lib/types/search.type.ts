@@ -1,10 +1,37 @@
 import { CoreMessage, JSONValue, Message } from 'ai';
 
+export type SearchSourceDetail = {
+  url: string;
+  domain: string;
+  title: string;
+  summary: string;
+};
+
+export type SearchAnalysisPoint = {
+  title: string;
+  content: string;
+  sources?: string[]; // References to source domains
+};
+
+export type SearchStep = {
+  title: string;
+  completed: boolean;
+  type: 'search' | 'reading' | 'analysis';
+  query?: string;
+  additional_queries?: string[];
+  sources?: string[];
+  sourceDetails?: SearchSourceDetail[];
+  results?: SearchResultItem[];
+  analysisPoints?: SearchAnalysisPoint[];
+  summary?: string;
+};
+
 export type SearchResults = {
   images: SearchResultImage[];
   results: SearchResultItem[];
   number_of_results?: number;
   query: string;
+  steps?: SearchStep[];
 };
 
 // If enabled the include_images_description is true, the images will be an array of { url: string, description: string }
@@ -30,6 +57,7 @@ export type SearchResultItem = {
   title: string;
   url: string;
   content: string;
+  source?: string;
 };
 
 export type SerperSearchResultItem = {

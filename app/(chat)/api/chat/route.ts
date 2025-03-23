@@ -86,8 +86,8 @@ export async function POST(request: Request) {
               ? []
               : [
                   'getWeather',
-                  'createDocument',
-                  'updateDocument',
+                  // 'createDocument',
+                  // 'updateDocument',
                   'requestSuggestions',
                   'search_the_web',
                   'think'
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
               session,
               dataStream
             }),
-            search_the_web: searchTool,
+            search_the_web: searchTool({ session, dataStream }),
             think: thinkTool
           },
           toolCallStreaming: true,

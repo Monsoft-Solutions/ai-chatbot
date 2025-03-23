@@ -5,6 +5,8 @@ import { useEffect, useRef } from 'react';
 import { artifactDefinitions, type ArtifactKind } from './artifact';
 import type { Suggestion } from '@/lib/db/schema';
 import { initialArtifactData, useArtifact } from '@/hooks/use-artifact';
+import { useSearch } from '@/hooks/use-search';
+import type { SearchStep } from '@/lib/types/search.type';
 
 export type DataStreamDelta = {
   type:
@@ -17,13 +19,19 @@ export type DataStreamDelta = {
     | 'suggestion'
     | 'clear'
     | 'finish'
-    | 'kind';
+    | 'kind'
+    | 'search-status'
+    | 'search-query'
+    | 'search-step'
+    | 'search-error';
   content: string | Suggestion;
 };
 
 export function DataStreamHandler({ id }: { id: string }) {
   const { data: dataStream } = useChat({ id });
   const { artifact, setArtifact, setMetadata } = useArtifact();
+  const { setSearchStatus, setSearchQuery, addSearchStep, resetSearch, setSearchError } =
+    useSearch();
   const lastProcessedIndex = useRef(-1);
 
   useEffect(() => {
@@ -33,6 +41,42 @@ export function DataStreamHandler({ id }: { id: string }) {
     lastProcessedIndex.current = dataStream.length - 1;
 
     (newDeltas as DataStreamDelta[]).forEach((delta: DataStreamDelta) => {
+      // Handle search-related stream data
+      if (delta.type === 'search-status') {
+        const status = delta.content as string;
+        if (status === 'starting') {
+          resetSearch();
+        }
+        setSearchStatus(status);
+        return;
+      }
+
+      if (delta.type === 'search-query') {
+        setSearchQuery(delta.content as string);
+        return;
+      }
+
+      if (delta.type === 'search-step') {
+        try {
+          const step = JSON.parse(delta.content as string) as SearchStep;
+          addSearchStep(step);
+        } catch (error) {
+          console.error('Failed to parse search step', error);
+        }
+        return;
+      }
+
+      if (delta.type === 'search-error') {
+        try {
+          const error = JSON.parse(delta.content as string);
+          setSearchError(error.message);
+        } catch (error) {
+          setSearchError('Unknown search error');
+        }
+        return;
+      }
+
+      // Handle artifact-related stream data
       const artifactDefinition = artifactDefinitions.find(
         (artifactDefinition) => artifactDefinition.kind === artifact.kind
       );
@@ -90,7 +134,17 @@ export function DataStreamHandler({ id }: { id: string }) {
         }
       });
     });
-  }, [dataStream, setArtifact, setMetadata, artifact]);
+  }, [
+    dataStream,
+    setArtifact,
+    setMetadata,
+    artifact,
+    setSearchStatus,
+    setSearchQuery,
+    addSearchStep,
+    resetSearch,
+    setSearchError
+  ]);
 
   return null;
 }
