@@ -80,7 +80,8 @@ export class ResearchAgent extends BaseAgent {
         'fact-checking',
         'current-events',
         'research-synthesis'
-      ]
+      ],
+      maxSteps: 25
     };
 
     super(config, context);

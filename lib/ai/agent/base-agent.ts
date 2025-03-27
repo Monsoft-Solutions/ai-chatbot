@@ -14,6 +14,7 @@ export type AgentConfig = {
   systemPrompt: string;
   tools: AgentTools;
   capabilities: string[];
+  maxSteps: number;
 };
 
 export type AgentContext = {
@@ -84,7 +85,7 @@ export class BaseAgent {
       model: myProvider.languageModel(this.config.model),
       system: this.config.systemPrompt,
       messages,
-      maxSteps: 10,
+      maxSteps: this.config.maxSteps || 5,
       experimental_activeTools: this.getActiveToolNames(),
       experimental_transform: smoothStream({ chunking: 'word' }),
       experimental_generateMessageId: generateUUID,

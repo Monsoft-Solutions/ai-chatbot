@@ -56,7 +56,8 @@ export class DocumentAgent extends BaseAgent {
         'email-drafting',
         'code-generation',
         'creative-writing'
-      ]
+      ],
+      maxSteps: 5
     };
 
     super(config, context);

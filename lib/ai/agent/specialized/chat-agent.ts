@@ -30,7 +30,8 @@ export class ChatAgent extends BaseAgent {
         'basic-qa',
         'creative-content',
         'friendly-chat'
-      ]
+      ],
+      maxSteps: 3
     };
 
     super(config, context);
