@@ -1,6 +1,6 @@
 'use client';
 
-import type { Attachment, Message, UIMessage } from 'ai';
+import type { Attachment, UIMessage } from 'ai';
 import cx from 'classnames';
 import type React from 'react';
 import {
@@ -11,7 +11,7 @@ import {
   type Dispatch,
   type SetStateAction,
   type ChangeEvent,
-  memo,
+  memo
 } from 'react';
 import { toast } from 'sonner';
 import { useLocalStorage, useWindowSize } from 'usehooks-ts';
@@ -22,7 +22,11 @@ import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { SuggestedActions } from './suggested-actions';
 import equal from 'fast-deep-equal';
-import { UseChatHelpers } from '@ai-sdk/react';
+import type { UseChatHelpers } from '@ai-sdk/react';
+import { useSearch } from '@/hooks/use-search';
+import type { SearchOption } from './search-options';
+import { ModelSelector } from '@/components/model-selector';
+import { SearchOptionsSelector } from './search-options';
 
 function PureMultimodalInput({
   chatId,
@@ -37,6 +41,7 @@ function PureMultimodalInput({
   append,
   handleSubmit,
   className,
+  selectedModelId
 }: {
   chatId: string;
   input: UseChatHelpers['input'];
@@ -50,9 +55,12 @@ function PureMultimodalInput({
   append: UseChatHelpers['append'];
   handleSubmit: UseChatHelpers['handleSubmit'];
   className?: string;
+  selectedModelId: string;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
+  const [searchOption] = useLocalStorage<SearchOption>('search-option', 'none');
+  const searchStore = useSearch();
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -63,7 +71,7 @@ function PureMultimodalInput({
   const adjustHeight = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight + 2}px`;
+      textareaRef.current.style.height = `${Math.max(textareaRef.current.scrollHeight + 2, 98)}px`;
     }
   };
 
@@ -74,10 +82,7 @@ function PureMultimodalInput({
     }
   };
 
-  const [localStorageInput, setLocalStorageInput] = useLocalStorage(
-    'input',
-    '',
-  );
+  const [localStorageInput, setLocalStorageInput] = useLocalStorage('input', '');
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -106,9 +111,30 @@ function PureMultimodalInput({
   const submitForm = useCallback(() => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
 
-    handleSubmit(undefined, {
-      experimental_attachments: attachments,
-    });
+    // If search option is enabled, configure the search state
+    if (searchOption !== 'none' && input.trim()) {
+      searchStore.resetSearch();
+      searchStore.setSearchQuery(input);
+      searchStore.setSearchStatus('starting');
+
+      // Add search instruction based on the selected option
+      const searchInstruction =
+        searchOption === 'web-search'
+          ? 'Search the web for current information on this topic.'
+          : 'Perform a deep, thorough research on this topic with multiple sources.';
+
+      const searchedInput = `${input}\n\n[AI Assistant should: ${searchInstruction}]`;
+
+      handleSubmit({ preventDefault: () => {} } as React.FormEvent<HTMLFormElement>, {
+        experimental_attachments: attachments,
+        data: { searchOption }
+      });
+    } else {
+      // Standard submission without search
+      handleSubmit(undefined, {
+        experimental_attachments: attachments
+      });
+    }
 
     setAttachments([]);
     setLocalStorageInput('');
@@ -124,6 +150,9 @@ function PureMultimodalInput({
     setLocalStorageInput,
     width,
     chatId,
+    searchOption,
+    input,
+    searchStore
   ]);
 
   const uploadFile = async (file: File) => {
@@ -131,65 +160,100 @@ function PureMultimodalInput({
     formData.append('file', file);
 
     try {
+      console.log('Uploading file:', file.name, 'type:', file.type, 'size:', file.size);
+
       const response = await fetch('/api/files/upload', {
         method: 'POST',
-        body: formData,
+        body: formData
       });
 
       if (response.ok) {
         const data = await response.json();
         const { url, pathname, contentType } = data;
+        console.log('File uploaded successfully:', url);
 
         return {
           url,
           name: pathname,
-          contentType: contentType,
-        };
+          contentType: contentType
+        } as Attachment;
       }
-      const { error } = await response.json();
-      toast.error(error);
+
+      // Handle error responses
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: 'Failed to parse error response' }));
+      const errorMessage =
+        errorData.details || errorData.error || 'Unknown error occurred during upload';
+      console.error('Upload error:', errorMessage);
+      toast.error(errorMessage);
+      return undefined;
     } catch (error) {
+      console.error('Failed to upload file:', error);
       toast.error('Failed to upload file, please try again!');
+      return undefined;
     }
   };
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(event.target.files || []);
+      if (files.length === 0) {
+        console.log('No files selected');
+        return;
+      }
 
+      console.log(
+        'Selected files:',
+        files.map((f) => `${f.name} (${f.type})`)
+      );
       setUploadQueue(files.map((file) => file.name));
 
       try {
         const uploadPromises = files.map((file) => uploadFile(file));
         const uploadedAttachments = await Promise.all(uploadPromises);
         const successfullyUploadedAttachments = uploadedAttachments.filter(
-          (attachment) => attachment !== undefined,
+          (attachment): attachment is Attachment => attachment !== undefined
         );
+
+        console.log('Successfully uploaded attachments:', successfullyUploadedAttachments.length);
+
+        if (successfullyUploadedAttachments.length === 0) {
+          toast.error('No files were uploaded successfully');
+        } else if (successfullyUploadedAttachments.length < files.length) {
+          toast.warning(
+            `${successfullyUploadedAttachments.length} of ${files.length} files uploaded successfully`
+          );
+        } else {
+          toast.success('All files uploaded successfully');
+        }
 
         setAttachments((currentAttachments) => [
           ...currentAttachments,
-          ...successfullyUploadedAttachments,
+          ...successfullyUploadedAttachments
         ]);
       } catch (error) {
-        console.error('Error uploading files!', error);
+        console.error('Error handling file uploads:', error);
+        toast.error('Failed to process uploads. Please try again!');
       } finally {
         setUploadQueue([]);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       }
     },
-    [setAttachments],
+    [setAttachments]
   );
 
   return (
-    <div className="relative w-full flex flex-col gap-4">
-      {messages.length === 0 &&
-        attachments.length === 0 &&
-        uploadQueue.length === 0 && (
-          <SuggestedActions append={append} chatId={chatId} />
-        )}
+    <div className="relative flex w-full flex-col gap-4">
+      {messages.length === 0 && attachments.length === 0 && uploadQueue.length === 0 && (
+        <SuggestedActions append={append} chatId={chatId} />
+      )}
 
       <input
         type="file"
-        className="fixed -top-4 -left-4 size-0.5 opacity-0 pointer-events-none"
+        className="pointer-events-none fixed -left-4 -top-4 size-0.5 opacity-0"
         ref={fileInputRef}
         multiple
         onChange={handleFileChange}
@@ -199,7 +263,7 @@ function PureMultimodalInput({
       {(attachments.length > 0 || uploadQueue.length > 0) && (
         <div
           data-testid="attachments-preview"
-          className="flex flex-row gap-2 overflow-x-scroll items-end"
+          className="flex flex-row items-end gap-2 overflow-x-scroll"
         >
           {attachments.map((attachment) => (
             <PreviewAttachment key={attachment.url} attachment={attachment} />
@@ -211,7 +275,7 @@ function PureMultimodalInput({
               attachment={{
                 url: '',
                 name: filename,
-                contentType: '',
+                contentType: ''
               }}
               isUploading={true}
             />
@@ -219,84 +283,108 @@ function PureMultimodalInput({
         </div>
       )}
 
-      <Textarea
-        data-testid="multimodal-input"
-        ref={textareaRef}
-        placeholder="Send a message..."
-        value={input}
-        onChange={handleInput}
-        className={cx(
-          'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-muted pb-10 dark:border-zinc-700',
-          className,
-        )}
-        rows={2}
-        autoFocus
-        onKeyDown={(event) => {
-          if (
-            event.key === 'Enter' &&
-            !event.shiftKey &&
-            !event.nativeEvent.isComposing
-          ) {
-            event.preventDefault();
-
-            if (status !== 'ready') {
-              toast.error('Please wait for the model to finish its response!');
-            } else {
-              submitForm();
-            }
+      <div className="relative">
+        <Textarea
+          data-testid="multimodal-input"
+          ref={textareaRef}
+          placeholder={
+            searchOption !== 'none'
+              ? `Send a message to search ${searchOption === 'web-search' ? 'the web' : 'with deep research'}...`
+              : 'Send a message...'
           }
-        }}
-      />
+          value={input}
+          onChange={handleInput}
+          className={cx(
+            'max-h-[calc(75dvh)] min-h-[98px] resize-none overflow-hidden rounded-xl bg-muted pb-12 pl-5 pr-32 pt-3 !text-base dark:border-zinc-700',
+            className
+          )}
+          rows={3}
+          autoFocus
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+              event.preventDefault();
 
-      <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start">
-        <AttachmentsButton fileInputRef={fileInputRef} status={status} />
-      </div>
+              if (status !== 'ready') {
+                toast.error('Please wait for the model to finish its response!');
+              } else {
+                submitForm();
+              }
+            }
+          }}
+        />
 
-      <div className="absolute bottom-0 right-0 p-2 w-fit flex flex-row justify-end">
-        {status === 'submitted' ? (
-          <StopButton stop={stop} setMessages={setMessages} />
-        ) : (
-          <SendButton
-            input={input}
-            submitForm={submitForm}
-            uploadQueue={uploadQueue}
+        <div className="absolute bottom-3 left-3 flex items-center space-x-1">
+          <AttachmentsButton
+            className="size-8 rounded-full p-0 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            disabled={status !== 'ready'}
+            onClick={() => {
+              if (fileInputRef.current) {
+                fileInputRef.current.click();
+              }
+            }}
+            iconSize={16}
           />
-        )}
+
+          <div className="flex items-center gap-1.5">
+            <SearchOptionsSelector minimal={true} />
+            <ModelSelector selectedModelId={selectedModelId} minimal={true} />
+          </div>
+        </div>
+        <div className="absolute bottom-3 right-3 flex items-center space-x-1">
+          {status === 'streaming' ? (
+            <StopButton
+              className="size-8 rounded-full bg-zinc-100 p-0 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
+              onClick={stop}
+              iconSize={16}
+            />
+          ) : (
+            <SendButton
+              className={cx('size-8 rounded-full p-0', {
+                'bg-primary text-black ': !searchOption || searchOption === 'none',
+                'bg-green-600 text-black ': searchOption && searchOption !== 'none',
+                'opacity-50': input.trim().length === 0 || status !== 'ready'
+              })}
+              disabled={input.trim().length === 0 || status !== 'ready'}
+              searchEnabled={searchOption !== 'none'}
+              onClick={submitForm}
+              iconSize={16}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-export const MultimodalInput = memo(
-  PureMultimodalInput,
-  (prevProps, nextProps) => {
-    if (prevProps.input !== nextProps.input) return false;
-    if (prevProps.status !== nextProps.status) return false;
-    if (!equal(prevProps.attachments, nextProps.attachments)) return false;
+export const MultimodalInput = memo(PureMultimodalInput, (prevProps, nextProps) => {
+  if (prevProps.input !== nextProps.input) return false;
+  if (prevProps.status !== nextProps.status) return false;
+  if (prevProps.selectedModelId !== nextProps.selectedModelId) return false;
+  if (!equal(prevProps.attachments, nextProps.attachments)) return false;
 
-    return true;
-  },
-);
+  return true;
+});
 
 function PureAttachmentsButton({
-  fileInputRef,
-  status,
+  className,
+  disabled,
+  onClick,
+  iconSize
 }: {
-  fileInputRef: React.MutableRefObject<HTMLInputElement | null>;
-  status: UseChatHelpers['status'];
+  className?: string;
+  disabled: boolean;
+  onClick: () => void;
+  iconSize: number;
 }) {
   return (
     <Button
-      data-testid="attachments-button"
-      className="rounded-md rounded-bl-lg p-[7px] h-fit dark:border-zinc-700 hover:dark:bg-zinc-900 hover:bg-zinc-200"
-      onClick={(event) => {
-        event.preventDefault();
-        fileInputRef.current?.click();
-      }}
-      disabled={status !== 'ready'}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
       variant="ghost"
+      type="button"
     >
-      <PaperclipIcon size={14} />
+      <PaperclipIcon size={iconSize} />
     </Button>
   );
 }
@@ -304,23 +392,17 @@ function PureAttachmentsButton({
 const AttachmentsButton = memo(PureAttachmentsButton);
 
 function PureStopButton({
-  stop,
-  setMessages,
+  className,
+  onClick,
+  iconSize
 }: {
-  stop: () => void;
-  setMessages: UseChatHelpers['setMessages'];
+  className?: string;
+  onClick: () => void;
+  iconSize: number;
 }) {
   return (
-    <Button
-      data-testid="stop-button"
-      className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
-      onClick={(event) => {
-        event.preventDefault();
-        stop();
-        setMessages((messages) => messages);
-      }}
-    >
-      <StopIcon size={14} />
+    <Button className={className} onClick={onClick} variant="ghost" type="button">
+      <StopIcon size={iconSize} />
     </Button>
   );
 }
@@ -328,32 +410,34 @@ function PureStopButton({
 const StopButton = memo(PureStopButton);
 
 function PureSendButton({
-  submitForm,
-  input,
-  uploadQueue,
+  className,
+  disabled,
+  searchEnabled,
+  onClick,
+  iconSize
 }: {
-  submitForm: () => void;
-  input: string;
-  uploadQueue: Array<string>;
+  className?: string;
+  disabled: boolean;
+  searchEnabled?: boolean;
+  onClick: () => void;
+  iconSize: number;
 }) {
   return (
     <Button
-      data-testid="send-button"
-      className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
-      onClick={(event) => {
-        event.preventDefault();
-        submitForm();
-      }}
-      disabled={input.length === 0 || uploadQueue.length > 0}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+      variant="ghost"
+      type="button"
     >
-      <ArrowUpIcon size={14} />
+      <ArrowUpIcon size={iconSize} />
     </Button>
   );
 }
 
 const SendButton = memo(PureSendButton, (prevProps, nextProps) => {
-  if (prevProps.uploadQueue.length !== nextProps.uploadQueue.length)
-    return false;
-  if (prevProps.input !== nextProps.input) return false;
+  if (prevProps.disabled !== nextProps.disabled) return false;
+  if (prevProps.searchEnabled !== nextProps.searchEnabled) return false;
+  if (prevProps.onClick !== nextProps.onClick) return false;
   return true;
 });

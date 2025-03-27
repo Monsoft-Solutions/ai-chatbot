@@ -6,12 +6,7 @@ import type { Vote } from '@/lib/db/schema';
 
 import { CopyIcon, ThumbDownIcon, ThumbUpIcon } from './icons';
 import { Button } from './ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from './ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { memo } from 'react';
 import equal from 'fast-deep-equal';
 import { toast } from 'sonner';
@@ -20,7 +15,7 @@ export function PureMessageActions({
   chatId,
   message,
   vote,
-  isLoading,
+  isLoading
 }: {
   chatId: string;
   message: Message;
@@ -39,7 +34,7 @@ export function PureMessageActions({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              className="py-1 px-2 h-fit text-muted-foreground"
+              className="h-fit px-2 py-1 text-muted-foreground"
               variant="outline"
               onClick={async () => {
                 const textFromParts = message.parts
@@ -67,7 +62,7 @@ export function PureMessageActions({
           <TooltipTrigger asChild>
             <Button
               data-testid="message-upvote"
-              className="py-1 px-2 h-fit text-muted-foreground !pointer-events-auto"
+              className="!pointer-events-auto h-fit px-2 py-1 text-muted-foreground"
               disabled={vote?.isUpvoted}
               variant="outline"
               onClick={async () => {
@@ -76,8 +71,8 @@ export function PureMessageActions({
                   body: JSON.stringify({
                     chatId,
                     messageId: message.id,
-                    type: 'up',
-                  }),
+                    type: 'up'
+                  })
                 });
 
                 toast.promise(upvote, {
@@ -89,7 +84,7 @@ export function PureMessageActions({
                         if (!currentVotes) return [];
 
                         const votesWithoutCurrent = currentVotes.filter(
-                          (vote) => vote.messageId !== message.id,
+                          (vote) => vote.messageId !== message.id
                         );
 
                         return [
@@ -97,16 +92,16 @@ export function PureMessageActions({
                           {
                             chatId,
                             messageId: message.id,
-                            isUpvoted: true,
-                          },
+                            isUpvoted: true
+                          }
                         ];
                       },
-                      { revalidate: false },
+                      { revalidate: false }
                     );
 
                     return 'Upvoted Response!';
                   },
-                  error: 'Failed to upvote response.',
+                  error: 'Failed to upvote response.'
                 });
               }}
             >
@@ -120,7 +115,7 @@ export function PureMessageActions({
           <TooltipTrigger asChild>
             <Button
               data-testid="message-downvote"
-              className="py-1 px-2 h-fit text-muted-foreground !pointer-events-auto"
+              className="!pointer-events-auto h-fit px-2 py-1 text-muted-foreground"
               variant="outline"
               disabled={vote && !vote.isUpvoted}
               onClick={async () => {
@@ -129,8 +124,8 @@ export function PureMessageActions({
                   body: JSON.stringify({
                     chatId,
                     messageId: message.id,
-                    type: 'down',
-                  }),
+                    type: 'down'
+                  })
                 });
 
                 toast.promise(downvote, {
@@ -142,7 +137,7 @@ export function PureMessageActions({
                         if (!currentVotes) return [];
 
                         const votesWithoutCurrent = currentVotes.filter(
-                          (vote) => vote.messageId !== message.id,
+                          (vote) => vote.messageId !== message.id
                         );
 
                         return [
@@ -150,16 +145,16 @@ export function PureMessageActions({
                           {
                             chatId,
                             messageId: message.id,
-                            isUpvoted: false,
-                          },
+                            isUpvoted: false
+                          }
                         ];
                       },
-                      { revalidate: false },
+                      { revalidate: false }
                     );
 
                     return 'Downvoted Response!';
                   },
-                  error: 'Failed to downvote response.',
+                  error: 'Failed to downvote response.'
                 });
               }}
             >
@@ -173,12 +168,9 @@ export function PureMessageActions({
   );
 }
 
-export const MessageActions = memo(
-  PureMessageActions,
-  (prevProps, nextProps) => {
-    if (!equal(prevProps.vote, nextProps.vote)) return false;
-    if (prevProps.isLoading !== nextProps.isLoading) return false;
+export const MessageActions = memo(PureMessageActions, (prevProps, nextProps) => {
+  if (!equal(prevProps.vote, nextProps.vote)) return false;
+  if (prevProps.isLoading !== nextProps.isLoading) return false;
 
-    return true;
-  },
-);
+  return true;
+});

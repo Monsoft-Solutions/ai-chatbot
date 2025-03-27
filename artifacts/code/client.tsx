@@ -1,20 +1,9 @@
 import { Artifact } from '@/components/create-artifact';
 import { CodeEditor } from '@/components/code-editor';
-import {
-  CopyIcon,
-  LogsIcon,
-  MessageIcon,
-  PlayIcon,
-  RedoIcon,
-  UndoIcon,
-} from '@/components/icons';
+import { CopyIcon, LogsIcon, MessageIcon, PlayIcon, RedoIcon, UndoIcon } from '@/components/icons';
 import { toast } from 'sonner';
 import { generateUUID } from '@/lib/utils';
-import {
-  Console,
-  ConsoleOutput,
-  ConsoleOutputContent,
-} from '@/components/console';
+import { Console, type ConsoleOutput, type ConsoleOutputContent } from '@/components/console';
 
 const OUTPUT_HANDLERS = {
   matplotlib: `
@@ -49,7 +38,7 @@ const OUTPUT_HANDLERS = {
   `,
   basic: `
     # Basic output capture setup
-  `,
+  `
 };
 
 function detectRequiredHandlers(code: string): string[] {
@@ -68,11 +57,10 @@ interface Metadata {
 
 export const codeArtifact = new Artifact<'code', Metadata>({
   kind: 'code',
-  description:
-    'Useful for code generation; Code execution is only available for python code.',
+  description: 'Useful for code generation; Code execution is only available for python code.',
   initialize: async ({ setMetadata }) => {
     setMetadata({
-      outputs: [],
+      outputs: []
     });
   },
   onStreamPart: ({ streamPart, setArtifact }) => {
@@ -86,7 +74,7 @@ export const codeArtifact = new Artifact<'code', Metadata>({
           draftArtifact.content.length < 310
             ? true
             : draftArtifact.isVisible,
-        status: 'streaming',
+        status: 'streaming'
       }));
     }
   },
@@ -103,7 +91,7 @@ export const codeArtifact = new Artifact<'code', Metadata>({
             setConsoleOutputs={() => {
               setMetadata({
                 ...metadata,
-                outputs: [],
+                outputs: []
               });
             }}
           />
@@ -127,26 +115,24 @@ export const codeArtifact = new Artifact<'code', Metadata>({
             {
               id: runId,
               contents: [],
-              status: 'in_progress',
-            },
-          ],
+              status: 'in_progress'
+            }
+          ]
         }));
 
         try {
           // @ts-expect-error - loadPyodide is not defined
           const currentPyodideInstance = await globalThis.loadPyodide({
-            indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.4/full/',
+            indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.4/full/'
           });
 
           currentPyodideInstance.setStdout({
             batched: (output: string) => {
               outputContent.push({
-                type: output.startsWith('data:image/png;base64')
-                  ? 'image'
-                  : 'text',
-                value: output,
+                type: output.startsWith('data:image/png;base64') ? 'image' : 'text',
+                value: output
               });
-            },
+            }
           });
 
           await currentPyodideInstance.loadPackagesFromImports(content, {
@@ -158,24 +144,22 @@ export const codeArtifact = new Artifact<'code', Metadata>({
                   {
                     id: runId,
                     contents: [{ type: 'text', value: message }],
-                    status: 'loading_packages',
-                  },
-                ],
+                    status: 'loading_packages'
+                  }
+                ]
               }));
-            },
+            }
           });
 
           const requiredHandlers = detectRequiredHandlers(content);
           for (const handler of requiredHandlers) {
             if (OUTPUT_HANDLERS[handler as keyof typeof OUTPUT_HANDLERS]) {
               await currentPyodideInstance.runPythonAsync(
-                OUTPUT_HANDLERS[handler as keyof typeof OUTPUT_HANDLERS],
+                OUTPUT_HANDLERS[handler as keyof typeof OUTPUT_HANDLERS]
               );
 
               if (handler === 'matplotlib') {
-                await currentPyodideInstance.runPythonAsync(
-                  'setup_matplotlib_output()',
-                );
+                await currentPyodideInstance.runPythonAsync('setup_matplotlib_output()');
               }
             }
           }
@@ -189,9 +173,9 @@ export const codeArtifact = new Artifact<'code', Metadata>({
               {
                 id: runId,
                 contents: outputContent,
-                status: 'completed',
-              },
-            ],
+                status: 'completed'
+              }
+            ]
           }));
         } catch (error: any) {
           setMetadata((metadata) => ({
@@ -201,12 +185,12 @@ export const codeArtifact = new Artifact<'code', Metadata>({
               {
                 id: runId,
                 contents: [{ type: 'text', value: error.message }],
-                status: 'failed',
-              },
-            ],
+                status: 'failed'
+              }
+            ]
           }));
         }
-      },
+      }
     },
     {
       icon: <UndoIcon size={18} />,
@@ -220,7 +204,7 @@ export const codeArtifact = new Artifact<'code', Metadata>({
         }
 
         return false;
-      },
+      }
     },
     {
       icon: <RedoIcon size={18} />,
@@ -234,7 +218,7 @@ export const codeArtifact = new Artifact<'code', Metadata>({
         }
 
         return false;
-      },
+      }
     },
     {
       icon: <CopyIcon size={18} />,
@@ -242,8 +226,8 @@ export const codeArtifact = new Artifact<'code', Metadata>({
       onClick: ({ content }) => {
         navigator.clipboard.writeText(content);
         toast.success('Copied to clipboard!');
-      },
-    },
+      }
+    }
   ],
   toolbar: [
     {
@@ -252,9 +236,9 @@ export const codeArtifact = new Artifact<'code', Metadata>({
       onClick: ({ appendMessage }) => {
         appendMessage({
           role: 'user',
-          content: 'Add comments to the code snippet for understanding',
+          content: 'Add comments to the code snippet for understanding'
         });
-      },
+      }
     },
     {
       icon: <LogsIcon />,
@@ -262,9 +246,9 @@ export const codeArtifact = new Artifact<'code', Metadata>({
       onClick: ({ appendMessage }) => {
         appendMessage({
           role: 'user',
-          content: 'Add logs to the code snippet for debugging',
+          content: 'Add logs to the code snippet for debugging'
         });
-      },
-    },
-  ],
+      }
+    }
+  ]
 });

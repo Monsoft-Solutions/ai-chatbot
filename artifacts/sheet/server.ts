@@ -14,8 +14,8 @@ export const sheetDocumentHandler = createDocumentHandler<'sheet'>({
       system: sheetPrompt,
       prompt: title,
       schema: z.object({
-        csv: z.string().describe('CSV data'),
-      }),
+        csv: z.string().describe('CSV data')
+      })
     });
 
     for await (const delta of fullStream) {
@@ -28,7 +28,7 @@ export const sheetDocumentHandler = createDocumentHandler<'sheet'>({
         if (csv) {
           dataStream.writeData({
             type: 'sheet-delta',
-            content: csv,
+            content: csv
           });
 
           draftContent = csv;
@@ -38,7 +38,7 @@ export const sheetDocumentHandler = createDocumentHandler<'sheet'>({
 
     dataStream.writeData({
       type: 'sheet-delta',
-      content: draftContent,
+      content: draftContent
     });
 
     return draftContent;
@@ -51,8 +51,8 @@ export const sheetDocumentHandler = createDocumentHandler<'sheet'>({
       system: updateDocumentPrompt(document.content, 'sheet'),
       prompt: description,
       schema: z.object({
-        csv: z.string(),
-      }),
+        csv: z.string()
+      })
     });
 
     for await (const delta of fullStream) {
@@ -65,7 +65,7 @@ export const sheetDocumentHandler = createDocumentHandler<'sheet'>({
         if (csv) {
           dataStream.writeData({
             type: 'sheet-delta',
-            content: csv,
+            content: csv
           });
 
           draftContent = csv;
@@ -74,5 +74,5 @@ export const sheetDocumentHandler = createDocumentHandler<'sheet'>({
     }
 
     return draftContent;
-  },
+  }
 });

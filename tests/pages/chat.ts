@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { chatModels } from '@/lib/ai/models';
-import { expect, Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 export class ChatPage {
   constructor(private page: Page) {}
@@ -34,7 +34,7 @@ export class ChatPage {
 
   async isGenerationComplete() {
     const response = await this.page.waitForResponse((response) =>
-      response.url().includes('/api/chat'),
+      response.url().includes('/api/chat')
     );
 
     await response.finished();
@@ -42,7 +42,7 @@ export class ChatPage {
 
   async isVoteComplete() {
     const response = await this.page.waitForResponse((response) =>
-      response.url().includes('/api/vote'),
+      response.url().includes('/api/vote')
     );
 
     await response.finished();
@@ -50,14 +50,12 @@ export class ChatPage {
 
   async hasChatIdInUrl() {
     await expect(this.page).toHaveURL(
-      /^http:\/\/localhost:3000\/chat\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+      /^http:\/\/localhost:3000\/chat\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
     );
   }
 
   async sendUserMessageFromSuggestion() {
-    await this.page
-      .getByRole('button', { name: 'What are the advantages of' })
-      .click();
+    await this.page.getByRole('button', { name: 'What are the advantages of' }).click();
   }
 
   async isElementVisible(elementId: string) {
@@ -74,14 +72,14 @@ export class ChatPage {
         process.cwd(),
         'public',
         'images',
-        'mouth of the seine, monet.jpg',
+        'mouth of the seine, monet.jpg'
       );
       const imageBuffer = fs.readFileSync(filePath);
 
       await fileChooser.setFiles({
         name: 'mouth of the seine, monet.jpg',
         mimeType: 'image/jpeg',
-        buffer: imageBuffer,
+        buffer: imageBuffer
       });
     });
 
@@ -94,9 +92,7 @@ export class ChatPage {
   }
 
   public async chooseModelFromSelector(chatModelId: string) {
-    const chatModel = chatModels.find(
-      (chatModel) => chatModel.id === chatModelId,
-    );
+    const chatModel = chatModels.find((chatModel) => chatModel.id === chatModelId);
 
     if (!chatModel) {
       throw new Error(`Model with id ${chatModelId} not found`);
@@ -108,9 +104,7 @@ export class ChatPage {
   }
 
   async getRecentAssistantMessage() {
-    const messageElements = await this.page
-      .getByTestId('message-assistant')
-      .all();
+    const messageElements = await this.page.getByTestId('message-assistant').all();
     const lastMessageElement = messageElements[messageElements.length - 1];
 
     const content = await lastMessageElement
@@ -122,11 +116,7 @@ export class ChatPage {
       .getByTestId('message-reasoning')
       .isVisible()
       .then(async (visible) =>
-        visible
-          ? await lastMessageElement
-              .getByTestId('message-reasoning')
-              .innerText()
-          : null,
+        visible ? await lastMessageElement.getByTestId('message-reasoning').innerText() : null
       )
       .catch(() => null);
 
@@ -135,16 +125,14 @@ export class ChatPage {
       content,
       reasoning: reasoningElement,
       async toggleReasoningVisibility() {
-        await lastMessageElement
-          .getByTestId('message-reasoning-toggle')
-          .click();
+        await lastMessageElement.getByTestId('message-reasoning-toggle').click();
       },
       async upvote() {
         await lastMessageElement.getByTestId('message-upvote').click();
       },
       async downvote() {
         await lastMessageElement.getByTestId('message-downvote').click();
-      },
+      }
     };
   }
 
@@ -173,10 +161,8 @@ export class ChatPage {
         await page.getByTestId('message-edit-button').click();
         await page.getByTestId('message-editor').fill(newMessage);
         await page.getByTestId('message-editor-send-button').click();
-        await expect(
-          page.getByTestId('message-editor-send-button'),
-        ).not.toBeVisible();
-      },
+        await expect(page.getByTestId('message-editor-send-button')).not.toBeVisible();
+      }
     };
   }
 }

@@ -31,9 +31,7 @@ test.describe('chat activity', () => {
     await chatPage.isGenerationComplete();
 
     const assistantMessage = await chatPage.getRecentAssistantMessage();
-    expect(assistantMessage.content).toContain(
-      'With Next.js, you can ship fast!',
-    );
+    expect(assistantMessage.content).toContain('With Next.js, you can ship fast!');
   });
 
   test('toggle between send/stop button based on activity', async () => {
@@ -104,9 +102,7 @@ test.describe('chat activity', () => {
 
     const assistantMessage = await chatPage.getRecentAssistantMessage();
 
-    expect(assistantMessage.content).toBe(
-      'The current temperature in San Francisco is 17°C.',
-    );
+    expect(assistantMessage.content).toBe('The current temperature in San Francisco is 17°C.');
   });
 
   test('upvote message', async () => {

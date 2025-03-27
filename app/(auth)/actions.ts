@@ -8,27 +8,24 @@ import { signIn } from './auth';
 
 const authFormSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(6)
 });
 
 export interface LoginActionState {
   status: 'idle' | 'in_progress' | 'success' | 'failed' | 'invalid_data';
 }
 
-export const login = async (
-  _: LoginActionState,
-  formData: FormData,
-): Promise<LoginActionState> => {
+export const login = async (_: LoginActionState, formData: FormData): Promise<LoginActionState> => {
   try {
     const validatedData = authFormSchema.parse({
       email: formData.get('email'),
-      password: formData.get('password'),
+      password: formData.get('password')
     });
 
     await signIn('credentials', {
       email: validatedData.email,
       password: validatedData.password,
-      redirect: false,
+      redirect: false
     });
 
     return { status: 'success' };
@@ -42,23 +39,17 @@ export const login = async (
 };
 
 export interface RegisterActionState {
-  status:
-    | 'idle'
-    | 'in_progress'
-    | 'success'
-    | 'failed'
-    | 'user_exists'
-    | 'invalid_data';
+  status: 'idle' | 'in_progress' | 'success' | 'failed' | 'user_exists' | 'invalid_data';
 }
 
 export const register = async (
   _: RegisterActionState,
-  formData: FormData,
+  formData: FormData
 ): Promise<RegisterActionState> => {
   try {
     const validatedData = authFormSchema.parse({
       email: formData.get('email'),
-      password: formData.get('password'),
+      password: formData.get('password')
     });
 
     const [user] = await getUser(validatedData.email);
@@ -70,7 +61,7 @@ export const register = async (
     await signIn('credentials', {
       email: validatedData.email,
       password: validatedData.password,
-      redirect: false,
+      redirect: false
     });
 
     return { status: 'success' };

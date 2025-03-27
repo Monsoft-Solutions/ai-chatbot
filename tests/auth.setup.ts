@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import { generateId } from 'ai';
 import { getUnixTime } from 'date-fns';
 import { expect, test as setup } from '@playwright/test';
@@ -16,9 +16,7 @@ setup('authenticate', async ({ page }) => {
   await page.getByLabel('Password').fill(testPassword);
   await page.getByRole('button', { name: 'Sign Up' }).click();
 
-  await expect(page.getByTestId('toast')).toContainText(
-    'Account created successfully!',
-  );
+  await expect(page.getByTestId('toast')).toContainText('Account created successfully!');
 
   await page.context().storageState({ path: authFile });
 });

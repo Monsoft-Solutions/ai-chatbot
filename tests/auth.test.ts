@@ -1,6 +1,6 @@
 import { generateId } from 'ai';
 import { getUnixTime } from 'date-fns';
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -43,35 +43,34 @@ class AuthPage {
   }
 }
 
-test.describe
-  .serial('authentication', () => {
-    let authPage: AuthPage;
+test.describe.serial('authentication', () => {
+  let authPage: AuthPage;
 
-    test.beforeEach(async ({ page }) => {
-      authPage = new AuthPage(page);
-    });
-
-    test('redirect to login page when unauthenticated', async ({ page }) => {
-      await page.goto('/');
-      await expect(page.getByRole('heading')).toContainText('Sign In');
-    });
-
-    test('register a test account', async ({ page }) => {
-      await authPage.register(testEmail, testPassword);
-      await expect(page).toHaveURL('/');
-      await authPage.expectToastToContain('Account created successfully!');
-    });
-
-    test('register test account with existing email', async () => {
-      await authPage.register(testEmail, testPassword);
-      await authPage.expectToastToContain('Account already exists!');
-    });
-
-    test('log into account', async ({ page }) => {
-      await authPage.login(testEmail, testPassword);
-
-      await page.waitForURL('/');
-      await expect(page).toHaveURL('/');
-      await expect(page.getByPlaceholder('Send a message...')).toBeVisible();
-    });
+  test.beforeEach(async ({ page }) => {
+    authPage = new AuthPage(page);
   });
+
+  test('redirect to login page when unauthenticated', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('heading')).toContainText('Sign In');
+  });
+
+  test('register a test account', async ({ page }) => {
+    await authPage.register(testEmail, testPassword);
+    await expect(page).toHaveURL('/');
+    await authPage.expectToastToContain('Account created successfully!');
+  });
+
+  test('register test account with existing email', async () => {
+    await authPage.register(testEmail, testPassword);
+    await authPage.expectToastToContain('Account already exists!');
+  });
+
+  test('log into account', async ({ page }) => {
+    await authPage.login(testEmail, testPassword);
+
+    await page.waitForURL('/');
+    await expect(page).toHaveURL('/');
+    await expect(page.getByPlaceholder('Send a message...')).toBeVisible();
+  });
+});

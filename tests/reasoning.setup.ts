@@ -1,11 +1,8 @@
-import path from 'path';
+import path from 'node:path';
 import { expect, test as setup } from '@playwright/test';
 import { ChatPage } from './pages/chat';
 
-const reasoningFile = path.join(
-  __dirname,
-  '../playwright/.reasoning/session.json',
-);
+const reasoningFile = path.join(__dirname, '../playwright/.reasoning/session.json');
 
 setup('switch to reasoning model', async ({ page }) => {
   const chatPage = new ChatPage(page);

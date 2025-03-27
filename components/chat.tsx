@@ -10,7 +10,7 @@ import { fetcher, generateUUID } from '@/lib/utils';
 import { Artifact } from './artifact';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
-import { VisibilityType } from './visibility-selector';
+import type { VisibilityType } from './visibility-selector';
 import { useArtifactSelector } from '@/hooks/use-artifact';
 import { toast } from 'sonner';
 
@@ -19,7 +19,7 @@ export function Chat({
   initialMessages,
   selectedChatModel,
   selectedVisibilityType,
-  isReadonly,
+  isReadonly
 }: {
   id: string;
   initialMessages: Array<UIMessage>;
@@ -29,34 +29,31 @@ export function Chat({
 }) {
   const { mutate } = useSWRConfig();
 
-  const {
-    messages,
-    setMessages,
-    handleSubmit,
-    input,
-    setInput,
-    append,
-    status,
-    stop,
-    reload,
-  } = useChat({
-    id,
-    body: { id, selectedChatModel: selectedChatModel },
-    initialMessages,
-    experimental_throttle: 100,
-    sendExtraMessageFields: true,
-    generateId: generateUUID,
-    onFinish: () => {
-      mutate('/api/history');
-    },
-    onError: () => {
-      toast.error('An error occured, please try again!');
-    },
-  });
+  const { messages, setMessages, handleSubmit, input, setInput, append, status, stop, reload } =
+    useChat({
+      id,
+      body: { id, selectedChatModel: selectedChatModel },
+      initialMessages,
+      experimental_throttle: 100,
+      sendExtraMessageFields: true,
+      generateId: generateUUID,
+      onFinish: () => {
+        mutate('/api/history');
+      },
+      onError: () => {
+        toast.error('An error occured, please try again!');
+      },
+      onToolCall: (toolCall) => {
+        console.log(`toolCall: ${JSON.stringify(toolCall)}`);
+      },
+      onResponse: (response) => {
+        console.log(`response: ${JSON.stringify(response)}`);
+      }
+    });
 
   const { data: votes } = useSWR<Array<Vote>>(
     messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
-    fetcher,
+    fetcher
   );
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
@@ -64,7 +61,7 @@ export function Chat({
 
   return (
     <>
-      <div className="flex flex-col min-w-0 h-dvh bg-background">
+      <div className="flex h-dvh min-w-0 flex-col bg-background">
         <ChatHeader
           chatId={id}
           selectedModelId={selectedChatModel}
@@ -83,7 +80,7 @@ export function Chat({
           isArtifactVisible={isArtifactVisible}
         />
 
-        <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
+        <form className="mx-auto flex w-full gap-2 bg-background px-4 pb-4 md:max-w-3xl md:pb-6">
           {!isReadonly && (
             <MultimodalInput
               chatId={id}
@@ -97,6 +94,7 @@ export function Chat({
               messages={messages}
               setMessages={setMessages}
               append={append}
+              selectedModelId={selectedChatModel}
             />
           )}
         </form>

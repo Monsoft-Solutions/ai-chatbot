@@ -22,10 +22,7 @@ export const buildContentFromDocument = (document: Node) => {
   return defaultMarkdownSerializer.serialize(document);
 };
 
-export const createDecorations = (
-  suggestions: Array<UISuggestion>,
-  view: EditorView,
-) => {
+export const createDecorations = (suggestions: Array<UISuggestion>, view: EditorView) => {
   const decorations: Array<Decoration> = [];
 
   for (const suggestion of suggestions) {
@@ -34,13 +31,13 @@ export const createDecorations = (
         suggestion.selectionStart,
         suggestion.selectionEnd,
         {
-          class: 'suggestion-highlight',
+          class: 'suggestion-highlight'
         },
         {
           suggestionId: suggestion.id,
-          type: 'highlight',
-        },
-      ),
+          type: 'highlight'
+        }
+      )
     );
 
     decorations.push(
@@ -52,9 +49,9 @@ export const createDecorations = (
         },
         {
           suggestionId: suggestion.id,
-          type: 'widget',
-        },
-      ),
+          type: 'widget'
+        }
+      )
     );
   }
 

@@ -1,11 +1,13 @@
-import { UIMessage } from 'ai';
+import type { UIMessage } from 'ai';
 import { PreviewMessage, ThinkingMessage } from './message';
 import { useScrollToBottom } from './use-scroll-to-bottom';
 import { Overview } from './overview';
 import { memo } from 'react';
-import { Vote } from '@/lib/db/schema';
+import type { Vote } from '@/lib/db/schema';
 import equal from 'fast-deep-equal';
-import { UseChatHelpers } from '@ai-sdk/react';
+import type { UseChatHelpers } from '@ai-sdk/react';
+import { SearchStepIndicator } from './search-step-indicator';
+import { useSearch } from '@/hooks/use-search';
 
 interface MessagesProps {
   chatId: string;
@@ -25,15 +27,22 @@ function PureMessages({
   messages,
   setMessages,
   reload,
-  isReadonly,
+  isReadonly
 }: MessagesProps) {
-  const [messagesContainerRef, messagesEndRef] =
-    useScrollToBottom<HTMLDivElement>();
+  const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();
+  const { status: searchStatus } = useSearch();
+
+  // Show thinking indicator when waiting for a response or during search
+  const showThinking =
+    status === 'submitted' && messages.length > 0 && messages[messages.length - 1].role === 'user';
+
+  // Show search steps whenever we're in search process (not just at submitted state)
+  const isSearchActive = searchStatus === 'starting' || searchStatus === 'searching';
 
   return (
     <div
       ref={messagesContainerRef}
-      className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4"
+      className="flex min-w-0 flex-1 flex-col gap-6 overflow-y-scroll pt-4"
     >
       {messages.length === 0 && <Overview />}
 
@@ -43,25 +52,20 @@ function PureMessages({
           chatId={chatId}
           message={message}
           isLoading={status === 'streaming' && messages.length - 1 === index}
-          vote={
-            votes
-              ? votes.find((vote) => vote.messageId === message.id)
-              : undefined
-          }
+          vote={votes ? votes.find((vote) => vote.messageId === message.id) : undefined}
           setMessages={setMessages}
           reload={reload}
           isReadonly={isReadonly}
         />
       ))}
 
-      {status === 'submitted' &&
-        messages.length > 0 &&
-        messages[messages.length - 1].role === 'user' && <ThinkingMessage />}
+      {/* Show search indicator whenever search is active */}
+      {isSearchActive && <SearchStepIndicator />}
 
-      <div
-        ref={messagesEndRef}
-        className="shrink-0 min-w-[24px] min-h-[24px]"
-      />
+      {/* Show thinking indicator when appropriate */}
+      {showThinking && <ThinkingMessage />}
+
+      <div ref={messagesEndRef} className="min-h-[24px] min-w-[24px] shrink-0" />
     </div>
   );
 }

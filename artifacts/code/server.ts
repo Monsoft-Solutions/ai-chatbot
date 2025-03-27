@@ -14,8 +14,8 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
       system: codePrompt,
       prompt: title,
       schema: z.object({
-        code: z.string(),
-      }),
+        code: z.string()
+      })
     });
 
     for await (const delta of fullStream) {
@@ -28,7 +28,7 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
         if (code) {
           dataStream.writeData({
             type: 'code-delta',
-            content: code ?? '',
+            content: code ?? ''
           });
 
           draftContent = code;
@@ -46,8 +46,8 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
       system: updateDocumentPrompt(document.content, 'code'),
       prompt: description,
       schema: z.object({
-        code: z.string(),
-      }),
+        code: z.string()
+      })
     });
 
     for await (const delta of fullStream) {
@@ -60,7 +60,7 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
         if (code) {
           dataStream.writeData({
             type: 'code-delta',
-            content: code ?? '',
+            content: code ?? ''
           });
 
           draftContent = code;
@@ -69,5 +69,5 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
     }
 
     return draftContent;
-  },
+  }
 });

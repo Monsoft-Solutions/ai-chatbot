@@ -7,7 +7,7 @@ import { useArtifact } from '@/hooks/use-artifact';
 
 const getActionText = (
   type: 'create' | 'update' | 'request-suggestions',
-  tense: 'present' | 'past',
+  tense: 'present' | 'past'
 ) => {
   switch (type) {
     case 'create':
@@ -15,9 +15,7 @@ const getActionText = (
     case 'update':
       return tense === 'present' ? 'Updating' : 'Updated';
     case 'request-suggestions':
-      return tense === 'present'
-        ? 'Adding suggestions'
-        : 'Added suggestions to';
+      return tense === 'present' ? 'Adding suggestions' : 'Added suggestions to';
     default:
       return null;
   }
@@ -29,22 +27,16 @@ interface DocumentToolResultProps {
   isReadonly: boolean;
 }
 
-function PureDocumentToolResult({
-  type,
-  result,
-  isReadonly,
-}: DocumentToolResultProps) {
+function PureDocumentToolResult({ type, result, isReadonly }: DocumentToolResultProps) {
   const { setArtifact } = useArtifact();
 
   return (
     <button
       type="button"
-      className="bg-background cursor-pointer border py-2 px-3 rounded-xl w-fit flex flex-row gap-3 items-start"
+      className="flex w-fit cursor-pointer flex-row items-start gap-3 rounded-xl border bg-background px-3 py-2"
       onClick={(event) => {
         if (isReadonly) {
-          toast.error(
-            'Viewing files in shared chats is currently not supported.',
-          );
+          toast.error('Viewing files in shared chats is currently not supported.');
           return;
         }
 
@@ -54,7 +46,7 @@ function PureDocumentToolResult({
           top: rect.top,
           left: rect.left,
           width: rect.width,
-          height: rect.height,
+          height: rect.height
         };
 
         setArtifact({
@@ -64,11 +56,11 @@ function PureDocumentToolResult({
           title: result.title,
           isVisible: true,
           status: 'idle',
-          boundingBox,
+          boundingBox
         });
       }}
     >
-      <div className="text-muted-foreground mt-1">
+      <div className="mt-1 text-muted-foreground">
         {type === 'create' ? (
           <FileIcon />
         ) : type === 'update' ? (
@@ -77,9 +69,7 @@ function PureDocumentToolResult({
           <MessageIcon />
         ) : null}
       </div>
-      <div className="text-left">
-        {`${getActionText(type, 'past')} "${result.title}"`}
-      </div>
+      <div className="text-left">{`${getActionText(type, 'past')} "${result.title}"`}</div>
     </button>
   );
 }
@@ -92,22 +82,16 @@ interface DocumentToolCallProps {
   isReadonly: boolean;
 }
 
-function PureDocumentToolCall({
-  type,
-  args,
-  isReadonly,
-}: DocumentToolCallProps) {
+function PureDocumentToolCall({ type, args, isReadonly }: DocumentToolCallProps) {
   const { setArtifact } = useArtifact();
 
   return (
     <button
       type="button"
-      className="cursor pointer w-fit border py-2 px-3 rounded-xl flex flex-row items-start justify-between gap-3"
+      className="cursor pointer flex w-fit flex-row items-start justify-between gap-3 rounded-xl border px-3 py-2"
       onClick={(event) => {
         if (isReadonly) {
-          toast.error(
-            'Viewing files in shared chats is currently not supported.',
-          );
+          toast.error('Viewing files in shared chats is currently not supported.');
           return;
         }
 
@@ -117,18 +101,18 @@ function PureDocumentToolCall({
           top: rect.top,
           left: rect.left,
           width: rect.width,
-          height: rect.height,
+          height: rect.height
         };
 
         setArtifact((currentArtifact) => ({
           ...currentArtifact,
           isVisible: true,
-          boundingBox,
+          boundingBox
         }));
       }}
     >
-      <div className="flex flex-row gap-3 items-start">
-        <div className="text-zinc-500 mt-1">
+      <div className="flex flex-row items-start gap-3">
+        <div className="mt-1 text-zinc-500">
           {type === 'create' ? (
             <FileIcon />
           ) : type === 'update' ? (
@@ -143,7 +127,7 @@ function PureDocumentToolCall({
         </div>
       </div>
 
-      <div className="animate-spin mt-1">{<LoaderIcon />}</div>
+      <div className="mt-1 animate-spin">{<LoaderIcon />}</div>
     </button>
   );
 }

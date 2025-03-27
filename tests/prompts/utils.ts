@@ -1,16 +1,10 @@
-import { CoreMessage, LanguageModelV1StreamPart } from 'ai';
+import type { CoreMessage, LanguageModelV1StreamPart } from 'ai';
 import { TEST_PROMPTS } from './basic';
 
-export function compareMessages(
-  firstMessage: CoreMessage,
-  secondMessage: CoreMessage,
-): boolean {
+export function compareMessages(firstMessage: CoreMessage, secondMessage: CoreMessage): boolean {
   if (firstMessage.role !== secondMessage.role) return false;
 
-  if (
-    !Array.isArray(firstMessage.content) ||
-    !Array.isArray(secondMessage.content)
-  ) {
+  if (!Array.isArray(firstMessage.content) || !Array.isArray(secondMessage.content)) {
     return false;
   }
 
@@ -57,7 +51,7 @@ const reasoningToDeltas = (text: string): LanguageModelV1StreamPart[] => {
 
 export const getResponseChunksByPrompt = (
   prompt: CoreMessage[],
-  isReasoningEnabled: boolean = false,
+  isReasoningEnabled = false
 ): Array<LanguageModelV1StreamPart> => {
   const recentMessage = prompt.at(-1);
 
@@ -74,21 +68,19 @@ export const getResponseChunksByPrompt = (
           type: 'finish',
           finishReason: 'stop',
           logprobs: undefined,
-          usage: { completionTokens: 10, promptTokens: 3 },
-        },
+          usage: { completionTokens: 10, promptTokens: 3 }
+        }
       ];
     } else if (compareMessages(recentMessage, TEST_PROMPTS.USER_GRASS)) {
       return [
-        ...reasoningToDeltas(
-          'Grass is green because of chlorophyll absorption!',
-        ),
+        ...reasoningToDeltas('Grass is green because of chlorophyll absorption!'),
         ...textToDeltas("It's just green duh!"),
         {
           type: 'finish',
           finishReason: 'stop',
           logprobs: undefined,
-          usage: { completionTokens: 10, promptTokens: 3 },
-        },
+          usage: { completionTokens: 10, promptTokens: 3 }
+        }
       ];
     }
   }
@@ -100,8 +92,8 @@ export const getResponseChunksByPrompt = (
         type: 'finish',
         finishReason: 'stop',
         logprobs: undefined,
-        usage: { completionTokens: 10, promptTokens: 3 },
-      },
+        usage: { completionTokens: 10, promptTokens: 3 }
+      }
     ];
   } else if (compareMessages(recentMessage, TEST_PROMPTS.USER_GRASS)) {
     return [
@@ -110,8 +102,8 @@ export const getResponseChunksByPrompt = (
         type: 'finish',
         finishReason: 'stop',
         logprobs: undefined,
-        usage: { completionTokens: 10, promptTokens: 3 },
-      },
+        usage: { completionTokens: 10, promptTokens: 3 }
+      }
     ];
   } else if (compareMessages(recentMessage, TEST_PROMPTS.USER_SKY)) {
     return [
@@ -120,8 +112,8 @@ export const getResponseChunksByPrompt = (
         type: 'finish',
         finishReason: 'stop',
         logprobs: undefined,
-        usage: { completionTokens: 10, promptTokens: 3 },
-      },
+        usage: { completionTokens: 10, promptTokens: 3 }
+      }
     ];
   } else if (compareMessages(recentMessage, TEST_PROMPTS.USER_NEXTJS)) {
     return [
@@ -131,20 +123,18 @@ export const getResponseChunksByPrompt = (
         type: 'finish',
         finishReason: 'stop',
         logprobs: undefined,
-        usage: { completionTokens: 10, promptTokens: 3 },
-      },
+        usage: { completionTokens: 10, promptTokens: 3 }
+      }
     ];
-  } else if (
-    compareMessages(recentMessage, TEST_PROMPTS.USER_IMAGE_ATTACHMENT)
-  ) {
+  } else if (compareMessages(recentMessage, TEST_PROMPTS.USER_IMAGE_ATTACHMENT)) {
     return [
       ...textToDeltas('This painting is by Monet!'),
       {
         type: 'finish',
         finishReason: 'stop',
         logprobs: undefined,
-        usage: { completionTokens: 10, promptTokens: 3 },
-      },
+        usage: { completionTokens: 10, promptTokens: 3 }
+      }
     ];
   } else if (compareMessages(recentMessage, TEST_PROMPTS.USER_TEXT_ARTIFACT)) {
     return [
@@ -155,19 +145,17 @@ export const getResponseChunksByPrompt = (
         toolCallType: 'function',
         args: JSON.stringify({
           title: 'Essay about Silicon Valley',
-          kind: 'text',
-        }),
+          kind: 'text'
+        })
       },
       {
         type: 'finish',
         finishReason: 'stop',
         logprobs: undefined,
-        usage: { completionTokens: 10, promptTokens: 3 },
-      },
+        usage: { completionTokens: 10, promptTokens: 3 }
+      }
     ];
-  } else if (
-    compareMessages(recentMessage, TEST_PROMPTS.CREATE_DOCUMENT_TEXT_CALL)
-  ) {
+  } else if (compareMessages(recentMessage, TEST_PROMPTS.CREATE_DOCUMENT_TEXT_CALL)) {
     return [
       ...textToDeltas(`\n
 # Silicon Valley: The Epicenter of Innovation
@@ -192,23 +180,21 @@ As we move forward, Silicon Valley continues to reinvent itself. While some pred
         type: 'finish',
         finishReason: 'stop',
         logprobs: undefined,
-        usage: { completionTokens: 10, promptTokens: 3 },
-      },
+        usage: { completionTokens: 10, promptTokens: 3 }
+      }
     ];
-  } else if (
-    compareMessages(recentMessage, TEST_PROMPTS.CREATE_DOCUMENT_TEXT_RESULT)
-  ) {
+  } else if (compareMessages(recentMessage, TEST_PROMPTS.CREATE_DOCUMENT_TEXT_RESULT)) {
     return [
       {
         type: 'text-delta',
-        textDelta: 'A document was created and is now visible to the user.',
+        textDelta: 'A document was created and is now visible to the user.'
       },
       {
         type: 'finish',
         finishReason: 'tool-calls',
         logprobs: undefined,
-        usage: { completionTokens: 10, promptTokens: 3 },
-      },
+        usage: { completionTokens: 10, promptTokens: 3 }
+      }
     ];
   } else if (compareMessages(recentMessage, TEST_PROMPTS.GET_WEATHER_CALL)) {
     return [
@@ -217,14 +203,14 @@ As we move forward, Silicon Valley continues to reinvent itself. While some pred
         toolCallId: 'call_456',
         toolName: 'getWeather',
         toolCallType: 'function',
-        args: JSON.stringify({ latitude: 37.7749, longitude: -122.4194 }),
+        args: JSON.stringify({ latitude: 37.7749, longitude: -122.4194 })
       },
       {
         type: 'finish',
         finishReason: 'stop',
         logprobs: undefined,
-        usage: { completionTokens: 10, promptTokens: 3 },
-      },
+        usage: { completionTokens: 10, promptTokens: 3 }
+      }
     ];
   } else if (compareMessages(recentMessage, TEST_PROMPTS.GET_WEATHER_RESULT)) {
     return [
@@ -233,8 +219,8 @@ As we move forward, Silicon Valley continues to reinvent itself. While some pred
         type: 'finish',
         finishReason: 'stop',
         logprobs: undefined,
-        usage: { completionTokens: 10, promptTokens: 3 },
-      },
+        usage: { completionTokens: 10, promptTokens: 3 }
+      }
     ];
   }
 

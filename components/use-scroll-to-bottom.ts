@@ -1,9 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react';
 
-export function useScrollToBottom<T extends HTMLElement>(): [
-  RefObject<T>,
-  RefObject<T>,
-] {
+export function useScrollToBottom<T extends HTMLElement>(): [RefObject<T>, RefObject<T>] {
   const containerRef = useRef<T>(null);
   const endRef = useRef<T>(null);
 
@@ -20,7 +17,7 @@ export function useScrollToBottom<T extends HTMLElement>(): [
         childList: true,
         subtree: true,
         attributes: true,
-        characterData: true,
+        characterData: true
       });
 
       return () => observer.disconnect();

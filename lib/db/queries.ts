@@ -14,9 +14,9 @@ import {
   suggestion,
   message,
   vote,
-  type DBMessage,
+  type DBMessage
 } from './schema';
-import { ArtifactKind } from '@/components/artifact';
+import type { ArtifactKind } from '@/components/artifact';
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
@@ -50,7 +50,7 @@ export async function createUser(email: string, password: string) {
 export async function saveChat({
   id,
   userId,
-  title,
+  title
 }: {
   id: string;
   userId: string;
@@ -61,7 +61,7 @@ export async function saveChat({
       id,
       createdAt: new Date(),
       userId,
-      title,
+      title
     });
   } catch (error) {
     console.error('Failed to save chat in database');
@@ -83,11 +83,7 @@ export async function deleteChatById({ id }: { id: string }) {
 
 export async function getChatsByUserId({ id }: { id: string }) {
   try {
-    return await db
-      .select()
-      .from(chat)
-      .where(eq(chat.userId, id))
-      .orderBy(desc(chat.createdAt));
+    return await db.select().from(chat).where(eq(chat.userId, id)).orderBy(desc(chat.createdAt));
   } catch (error) {
     console.error('Failed to get chats by user from database');
     throw error;
@@ -104,11 +100,7 @@ export async function getChatById({ id }: { id: string }) {
   }
 }
 
-export async function saveMessages({
-  messages,
-}: {
-  messages: Array<DBMessage>;
-}) {
+export async function saveMessages({ messages }: { messages: Array<DBMessage> }) {
   try {
     return await db.insert(message).values(messages);
   } catch (error) {
@@ -133,7 +125,7 @@ export async function getMessagesByChatId({ id }: { id: string }) {
 export async function voteMessage({
   chatId,
   messageId,
-  type,
+  type
 }: {
   chatId: string;
   messageId: string;
@@ -154,7 +146,7 @@ export async function voteMessage({
     return await db.insert(vote).values({
       chatId,
       messageId,
-      isUpvoted: type === 'up',
+      isUpvoted: type === 'up'
     });
   } catch (error) {
     console.error('Failed to upvote message in database', error);
@@ -176,7 +168,7 @@ export async function saveDocument({
   title,
   kind,
   content,
-  userId,
+  userId
 }: {
   id: string;
   title: string;
@@ -191,7 +183,7 @@ export async function saveDocument({
       kind,
       content,
       userId,
-      createdAt: new Date(),
+      createdAt: new Date()
     });
   } catch (error) {
     console.error('Failed to save document in database');
@@ -231,7 +223,7 @@ export async function getDocumentById({ id }: { id: string }) {
 
 export async function deleteDocumentsByIdAfterTimestamp({
   id,
-  timestamp,
+  timestamp
 }: {
   id: string;
   timestamp: Date;
@@ -239,29 +231,18 @@ export async function deleteDocumentsByIdAfterTimestamp({
   try {
     await db
       .delete(suggestion)
-      .where(
-        and(
-          eq(suggestion.documentId, id),
-          gt(suggestion.documentCreatedAt, timestamp),
-        ),
-      );
+      .where(and(eq(suggestion.documentId, id), gt(suggestion.documentCreatedAt, timestamp)));
 
     return await db
       .delete(document)
       .where(and(eq(document.id, id), gt(document.createdAt, timestamp)));
   } catch (error) {
-    console.error(
-      'Failed to delete documents by id after timestamp from database',
-    );
+    console.error('Failed to delete documents by id after timestamp from database');
     throw error;
   }
 }
 
-export async function saveSuggestions({
-  suggestions,
-}: {
-  suggestions: Array<Suggestion>;
-}) {
+export async function saveSuggestions({ suggestions }: { suggestions: Array<Suggestion> }) {
   try {
     return await db.insert(suggestion).values(suggestions);
   } catch (error) {
@@ -270,20 +251,14 @@ export async function saveSuggestions({
   }
 }
 
-export async function getSuggestionsByDocumentId({
-  documentId,
-}: {
-  documentId: string;
-}) {
+export async function getSuggestionsByDocumentId({ documentId }: { documentId: string }) {
   try {
     return await db
       .select()
       .from(suggestion)
       .where(and(eq(suggestion.documentId, documentId)));
   } catch (error) {
-    console.error(
-      'Failed to get suggestions by document version from database',
-    );
+    console.error('Failed to get suggestions by document version from database');
     throw error;
   }
 }
@@ -299,7 +274,7 @@ export async function getMessageById({ id }: { id: string }) {
 
 export async function deleteMessagesByChatIdAfterTimestamp({
   chatId,
-  timestamp,
+  timestamp
 }: {
   chatId: string;
   timestamp: Date;
@@ -308,36 +283,28 @@ export async function deleteMessagesByChatIdAfterTimestamp({
     const messagesToDelete = await db
       .select({ id: message.id })
       .from(message)
-      .where(
-        and(eq(message.chatId, chatId), gte(message.createdAt, timestamp)),
-      );
+      .where(and(eq(message.chatId, chatId), gte(message.createdAt, timestamp)));
 
     const messageIds = messagesToDelete.map((message) => message.id);
 
     if (messageIds.length > 0) {
       await db
         .delete(vote)
-        .where(
-          and(eq(vote.chatId, chatId), inArray(vote.messageId, messageIds)),
-        );
+        .where(and(eq(vote.chatId, chatId), inArray(vote.messageId, messageIds)));
 
       return await db
         .delete(message)
-        .where(
-          and(eq(message.chatId, chatId), inArray(message.id, messageIds)),
-        );
+        .where(and(eq(message.chatId, chatId), inArray(message.id, messageIds)));
     }
   } catch (error) {
-    console.error(
-      'Failed to delete messages by id after timestamp from database',
-    );
+    console.error('Failed to delete messages by id after timestamp from database');
     throw error;
   }
 }
 
 export async function updateChatVisiblityById({
   chatId,
-  visibility,
+  visibility
 }: {
   chatId: string;
   visibility: 'private' | 'public';

@@ -1,14 +1,7 @@
 import type { Attachment, UIMessage } from 'ai';
 import { formatDistance } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  type Dispatch,
-  memo,
-  type SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { type Dispatch, memo, type SetStateAction, useCallback, useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { useDebounceCallback, useWindowSize } from 'usehooks-ts';
 import type { Document, Vote } from '@/lib/db/schema';
@@ -26,14 +19,9 @@ import { codeArtifact } from '@/artifacts/code/client';
 import { sheetArtifact } from '@/artifacts/sheet/client';
 import { textArtifact } from '@/artifacts/text/client';
 import equal from 'fast-deep-equal';
-import { UseChatHelpers } from '@ai-sdk/react';
+import type { UseChatHelpers } from '@ai-sdk/react';
 
-export const artifactDefinitions = [
-  textArtifact,
-  codeArtifact,
-  imageArtifact,
-  sheetArtifact,
-];
+export const artifactDefinitions = [textArtifact, codeArtifact, imageArtifact, sheetArtifact];
 export type ArtifactKind = (typeof artifactDefinitions)[number]['kind'];
 
 export interface UIArtifact {
@@ -65,7 +53,7 @@ function PureArtifact({
   setMessages,
   reload,
   votes,
-  isReadonly,
+  isReadonly
 }: {
   chatId: string;
   input: string;
@@ -87,12 +75,12 @@ function PureArtifact({
   const {
     data: documents,
     isLoading: isDocumentsFetching,
-    mutate: mutateDocuments,
+    mutate: mutateDocuments
   } = useSWR<Array<Document>>(
     artifact.documentId !== 'init' && artifact.status !== 'streaming'
       ? `/api/document?id=${artifact.documentId}`
       : null,
-    fetcher,
+    fetcher
   );
 
   const [mode, setMode] = useState<'edit' | 'diff'>('edit');
@@ -110,7 +98,7 @@ function PureArtifact({
         setCurrentVersionIndex(documents.length - 1);
         setArtifact((currentArtifact) => ({
           ...currentArtifact,
-          content: mostRecentDocument.content ?? '',
+          content: mostRecentDocument.content ?? ''
         }));
       }
     }
@@ -145,8 +133,8 @@ function PureArtifact({
               body: JSON.stringify({
                 title: artifact.title,
                 content: updatedContent,
-                kind: artifact.kind,
-              }),
+                kind: artifact.kind
+              })
             });
 
             setIsContentDirty(false);
@@ -154,23 +142,20 @@ function PureArtifact({
             const newDocument = {
               ...currentDocument,
               content: updatedContent,
-              createdAt: new Date(),
+              createdAt: new Date()
             };
 
             return [...currentDocuments, newDocument];
           }
           return currentDocuments;
         },
-        { revalidate: false },
+        { revalidate: false }
       );
     },
-    [artifact, mutate],
+    [artifact, mutate]
   );
 
-  const debouncedHandleContentChange = useDebounceCallback(
-    handleContentChange,
-    2000,
-  );
+  const debouncedHandleContentChange = useDebounceCallback(handleContentChange, 2000);
 
   const saveContent = useCallback(
     (updatedContent: string, debounce: boolean) => {
@@ -184,7 +169,7 @@ function PureArtifact({
         }
       }
     },
-    [document, debouncedHandleContentChange, handleContentChange],
+    [document, debouncedHandleContentChange, handleContentChange]
   );
 
   function getDocumentContentById(index: number) {
@@ -225,15 +210,13 @@ function PureArtifact({
    */
 
   const isCurrentVersion =
-    documents && documents.length > 0
-      ? currentVersionIndex === documents.length - 1
-      : true;
+    documents && documents.length > 0 ? currentVersionIndex === documents.length - 1 : true;
 
   const { width: windowWidth, height: windowHeight } = useWindowSize();
   const isMobile = windowWidth ? windowWidth < 768 : false;
 
   const artifactDefinition = artifactDefinitions.find(
-    (definition) => definition.kind === artifact.kind,
+    (definition) => definition.kind === artifact.kind
   );
 
   if (!artifactDefinition) {
@@ -245,7 +228,7 @@ function PureArtifact({
       if (artifactDefinition.initialize) {
         artifactDefinition.initialize({
           documentId: artifact.documentId,
-          setMetadata,
+          setMetadata
         });
       }
     }
@@ -256,29 +239,29 @@ function PureArtifact({
       {artifact.isVisible && (
         <motion.div
           data-testid="artifact"
-          className="flex flex-row h-dvh w-dvw fixed top-0 left-0 z-50 bg-transparent"
+          className="fixed left-0 top-0 z-50 flex h-dvh w-dvw flex-row bg-transparent"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { delay: 0.4 } }}
         >
           {!isMobile && (
             <motion.div
-              className="fixed bg-background h-dvh"
+              className="fixed h-dvh bg-background"
               initial={{
                 width: isSidebarOpen ? windowWidth - 256 : windowWidth,
-                right: 0,
+                right: 0
               }}
               animate={{ width: windowWidth, right: 0 }}
               exit={{
                 width: isSidebarOpen ? windowWidth - 256 : windowWidth,
-                right: 0,
+                right: 0
               }}
             />
           )}
 
           {!isMobile && (
             <motion.div
-              className="relative w-[400px] bg-muted dark:bg-background h-dvh shrink-0"
+              className="relative h-dvh w-[400px] shrink-0 bg-muted dark:bg-background"
               initial={{ opacity: 0, x: 10, scale: 1 }}
               animate={{
                 opacity: 1,
@@ -288,20 +271,20 @@ function PureArtifact({
                   delay: 0.2,
                   type: 'spring',
                   stiffness: 200,
-                  damping: 30,
-                },
+                  damping: 30
+                }
               }}
               exit={{
                 opacity: 0,
                 x: 0,
                 scale: 1,
-                transition: { duration: 0 },
+                transition: { duration: 0 }
               }}
             >
               <AnimatePresence>
                 {!isCurrentVersion && (
                   <motion.div
-                    className="left-0 absolute h-dvh w-[400px] top-0 bg-zinc-900/50 z-50"
+                    className="absolute left-0 top-0 z-50 h-dvh w-[400px] bg-zinc-900/50"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -309,7 +292,7 @@ function PureArtifact({
                 )}
               </AnimatePresence>
 
-              <div className="flex flex-col h-full justify-between items-center gap-4">
+              <div className="flex h-full flex-col items-center justify-between gap-4">
                 <ArtifactMessages
                   chatId={chatId}
                   status={status}
@@ -321,7 +304,7 @@ function PureArtifact({
                   artifactStatus={artifact.status}
                 />
 
-                <form className="flex flex-row gap-2 relative items-end w-full px-4 pb-4">
+                <form className="relative flex w-full flex-row items-end gap-2 px-4 pb-4">
                   <MultimodalInput
                     chatId={chatId}
                     input={input}
@@ -335,6 +318,7 @@ function PureArtifact({
                     append={append}
                     className="bg-background dark:bg-muted"
                     setMessages={setMessages}
+                    selectedModelId="chat-model-smart"
                   />
                 </form>
               </div>
@@ -342,7 +326,7 @@ function PureArtifact({
           )}
 
           <motion.div
-            className="fixed dark:bg-muted bg-background h-dvh flex flex-col overflow-y-scroll md:border-l dark:border-zinc-700 border-zinc-200"
+            className="fixed flex h-dvh flex-col overflow-y-scroll border-zinc-200 bg-background dark:border-zinc-700 dark:bg-muted md:border-l"
             initial={
               isMobile
                 ? {
@@ -351,7 +335,7 @@ function PureArtifact({
                     y: artifact.boundingBox.top,
                     height: artifact.boundingBox.height,
                     width: artifact.boundingBox.width,
-                    borderRadius: 50,
+                    borderRadius: 50
                   }
                 : {
                     opacity: 1,
@@ -359,7 +343,7 @@ function PureArtifact({
                     y: artifact.boundingBox.top,
                     height: artifact.boundingBox.height,
                     width: artifact.boundingBox.width,
-                    borderRadius: 50,
+                    borderRadius: 50
                   }
             }
             animate={
@@ -376,25 +360,23 @@ function PureArtifact({
                       type: 'spring',
                       stiffness: 200,
                       damping: 30,
-                      duration: 5000,
-                    },
+                      duration: 5000
+                    }
                   }
                 : {
                     opacity: 1,
                     x: 400,
                     y: 0,
                     height: windowHeight,
-                    width: windowWidth
-                      ? windowWidth - 400
-                      : 'calc(100dvw-400px)',
+                    width: windowWidth ? windowWidth - 400 : 'calc(100dvw-400px)',
                     borderRadius: 0,
                     transition: {
                       delay: 0,
                       type: 'spring',
                       stiffness: 200,
                       damping: 30,
-                      duration: 5000,
-                    },
+                      duration: 5000
+                    }
                   }
             }
             exit={{
@@ -404,33 +386,27 @@ function PureArtifact({
                 delay: 0.1,
                 type: 'spring',
                 stiffness: 600,
-                damping: 30,
-              },
+                damping: 30
+              }
             }}
           >
-            <div className="p-2 flex flex-row justify-between items-start">
-              <div className="flex flex-row gap-4 items-start">
+            <div className="flex flex-row items-start justify-between p-2">
+              <div className="flex flex-row items-start gap-4">
                 <ArtifactCloseButton />
 
                 <div className="flex flex-col">
                   <div className="font-medium">{artifact.title}</div>
 
                   {isContentDirty ? (
-                    <div className="text-sm text-muted-foreground">
-                      Saving changes...
-                    </div>
+                    <div className="text-sm text-muted-foreground">Saving changes...</div>
                   ) : document ? (
                     <div className="text-sm text-muted-foreground">
-                      {`Updated ${formatDistance(
-                        new Date(document.createdAt),
-                        new Date(),
-                        {
-                          addSuffix: true,
-                        },
-                      )}`}
+                      {`Updated ${formatDistance(new Date(document.createdAt), new Date(), {
+                        addSuffix: true
+                      })}`}
                     </div>
                   ) : (
-                    <div className="w-32 h-3 mt-2 bg-muted-foreground/20 rounded-md animate-pulse" />
+                    <div className="mt-2 h-3 w-32 animate-pulse rounded-md bg-muted-foreground/20" />
                   )}
                 </div>
               </div>
@@ -446,13 +422,11 @@ function PureArtifact({
               />
             </div>
 
-            <div className="dark:bg-muted bg-background h-full overflow-y-scroll !max-w-full items-center">
+            <div className="h-full !max-w-full items-center overflow-y-scroll bg-background dark:bg-muted">
               <artifactDefinition.content
                 title={artifact.title}
                 content={
-                  isCurrentVersion
-                    ? artifact.content
-                    : getDocumentContentById(currentVersionIndex)
+                  isCurrentVersion ? artifact.content : getDocumentContentById(currentVersionIndex)
                 }
                 mode={mode}
                 status={artifact.status}

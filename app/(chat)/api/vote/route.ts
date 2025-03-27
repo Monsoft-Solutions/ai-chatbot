@@ -31,11 +31,7 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const {
-    chatId,
-    messageId,
-    type,
-  }: { chatId: string; messageId: string; type: 'up' | 'down' } =
+  const { chatId, messageId, type }: { chatId: string; messageId: string; type: 'up' | 'down' } =
     await request.json();
 
   if (!chatId || !messageId || !type) {
@@ -61,7 +57,7 @@ export async function PATCH(request: Request) {
   await voteMessage({
     chatId,
     messageId,
-    type: type,
+    type: type
   });
 
   return new Response('Message voted', { status: 200 });

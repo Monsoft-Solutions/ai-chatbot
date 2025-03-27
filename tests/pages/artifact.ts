@@ -1,4 +1,4 @@
-import { expect, Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 export class ArtifactPage {
   constructor(private page: Page) {}
@@ -21,7 +21,7 @@ export class ArtifactPage {
 
   async isGenerationComplete() {
     const response = await this.page.waitForResponse((response) =>
-      response.url().includes('/api/chat'),
+      response.url().includes('/api/chat')
     );
 
     await response.finished();
@@ -34,9 +34,7 @@ export class ArtifactPage {
   }
 
   async getRecentAssistantMessage() {
-    const messageElements = await this.artifact
-      .getByTestId('message-assistant')
-      .all();
+    const messageElements = await this.artifact.getByTestId('message-assistant').all();
     const lastMessageElement = messageElements[messageElements.length - 1];
 
     const content = await lastMessageElement
@@ -48,11 +46,7 @@ export class ArtifactPage {
       .getByTestId('message-reasoning')
       .isVisible()
       .then(async (visible) =>
-        visible
-          ? await lastMessageElement
-              .getByTestId('message-reasoning')
-              .innerText()
-          : null,
+        visible ? await lastMessageElement.getByTestId('message-reasoning').innerText() : null
       )
       .catch(() => null);
 
@@ -61,17 +55,13 @@ export class ArtifactPage {
       content,
       reasoning: reasoningElement,
       async toggleReasoningVisibility() {
-        await lastMessageElement
-          .getByTestId('message-reasoning-toggle')
-          .click();
-      },
+        await lastMessageElement.getByTestId('message-reasoning-toggle').click();
+      }
     };
   }
 
   async getRecentUserMessage() {
-    const messageElements = await this.artifact
-      .getByTestId('message-user')
-      .all();
+    const messageElements = await this.artifact.getByTestId('message-user').all();
     const lastMessageElement = messageElements[messageElements.length - 1];
 
     const content = await lastMessageElement.innerText();
@@ -95,10 +85,8 @@ export class ArtifactPage {
         await page.getByTestId('message-edit-button').click();
         await page.getByTestId('message-editor').fill(newMessage);
         await page.getByTestId('message-editor-send-button').click();
-        await expect(
-          page.getByTestId('message-editor-send-button'),
-        ).not.toBeVisible();
-      },
+        await expect(page.getByTestId('message-editor-send-button')).not.toBeVisible();
+      }
     };
   }
 

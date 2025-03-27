@@ -8,23 +8,23 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL('https://chat.vercel.ai'),
   title: 'Next.js Chatbot Template',
-  description: 'Next.js chatbot template using the AI SDK.',
+  description: 'Next.js chatbot template using the AI SDK.'
 };
 
 export const viewport = {
-  maximumScale: 1, // Disable auto-zoom on mobile Safari
+  maximumScale: 1 // Disable auto-zoom on mobile Safari
 };
 
 const geist = Geist({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-geist',
+  variable: '--font-geist'
 });
 
 const geistMono = Geist_Mono({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-geist-mono',
+  variable: '--font-geist-mono'
 });
 
 const LIGHT_THEME_COLOR = 'hsl(0 0% 100%)';
@@ -48,7 +48,7 @@ const THEME_COLOR_SCRIPT = `\
 })();`;
 
 export default async function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
@@ -65,7 +65,7 @@ export default async function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: THEME_COLOR_SCRIPT,
+            __html: THEME_COLOR_SCRIPT
           }}
         />
       </head>

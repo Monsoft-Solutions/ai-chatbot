@@ -8,9 +8,9 @@ import {
   MessageIcon,
   PenIcon,
   RedoIcon,
-  UndoIcon,
+  UndoIcon
 } from '@/components/icons';
-import { Suggestion } from '@/lib/db/schema';
+import type { Suggestion } from '@/lib/db/schema';
 import { toast } from 'sonner';
 import { getSuggestions } from '../actions';
 
@@ -25,17 +25,14 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
     const suggestions = await getSuggestions({ documentId });
 
     setMetadata({
-      suggestions,
+      suggestions
     });
   },
   onStreamPart: ({ streamPart, setMetadata, setArtifact }) => {
     if (streamPart.type === 'suggestion') {
       setMetadata((metadata) => {
         return {
-          suggestions: [
-            ...metadata.suggestions,
-            streamPart.content as Suggestion,
-          ],
+          suggestions: [...metadata.suggestions, streamPart.content as Suggestion]
         };
       });
     }
@@ -51,7 +48,7 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
             draftArtifact.content.length < 450
               ? true
               : draftArtifact.isVisible,
-          status: 'streaming',
+          status: 'streaming'
         };
       });
     }
@@ -65,7 +62,7 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
     onSaveContent,
     getDocumentContentById,
     isLoading,
-    metadata,
+    metadata
   }) => {
     if (isLoading) {
       return <DocumentSkeleton artifactKind="text" />;
@@ -80,7 +77,7 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
 
     return (
       <>
-        <div className="flex flex-row py-8 md:p-20 px-4">
+        <div className="flex flex-row px-4 py-8 md:p-20">
           <Editor
             content={content}
             suggestions={metadata ? metadata.suggestions : []}
@@ -90,10 +87,8 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
             onSaveContent={onSaveContent}
           />
 
-          {metadata &&
-          metadata.suggestions &&
-          metadata.suggestions.length > 0 ? (
-            <div className="md:hidden h-dvh w-12 shrink-0" />
+          {metadata?.suggestions && metadata.suggestions.length > 0 ? (
+            <div className="h-dvh w-12 shrink-0 md:hidden" />
           ) : null}
         </div>
       </>
@@ -112,7 +107,7 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
         }
 
         return false;
-      },
+      }
     },
     {
       icon: <UndoIcon size={18} />,
@@ -126,7 +121,7 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
         }
 
         return false;
-      },
+      }
     },
     {
       icon: <RedoIcon size={18} />,
@@ -140,7 +135,7 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
         }
 
         return false;
-      },
+      }
     },
     {
       icon: <CopyIcon size={18} />,
@@ -148,8 +143,8 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
       onClick: ({ content }) => {
         navigator.clipboard.writeText(content);
         toast.success('Copied to clipboard!');
-      },
-    },
+      }
+    }
   ],
   toolbar: [
     {
@@ -159,9 +154,9 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
         appendMessage({
           role: 'user',
           content:
-            'Please add final polish and check for grammar, add section titles for better structure, and ensure everything reads smoothly.',
+            'Please add final polish and check for grammar, add section titles for better structure, and ensure everything reads smoothly.'
         });
-      },
+      }
     },
     {
       icon: <MessageIcon />,
@@ -169,10 +164,9 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
       onClick: ({ appendMessage }) => {
         appendMessage({
           role: 'user',
-          content:
-            'Please add suggestions you have that could improve the writing.',
+          content: 'Please add suggestions you have that could improve the writing.'
         });
-      },
-    },
-  ],
+      }
+    }
+  ]
 });

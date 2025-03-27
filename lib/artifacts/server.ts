@@ -2,11 +2,11 @@ import { codeDocumentHandler } from '@/artifacts/code/server';
 import { imageDocumentHandler } from '@/artifacts/image/server';
 import { sheetDocumentHandler } from '@/artifacts/sheet/server';
 import { textDocumentHandler } from '@/artifacts/text/server';
-import { ArtifactKind } from '@/components/artifact';
-import { DataStreamWriter } from 'ai';
-import { Document } from '../db/schema';
+import type { ArtifactKind } from '@/components/artifact';
+import type { DataStreamWriter } from 'ai';
+import type { Document } from '../db/schema';
 import { saveDocument } from '../db/queries';
-import { Session } from 'next-auth';
+import type { Session } from 'next-auth';
 
 export interface SaveDocumentProps {
   id: string;
@@ -48,7 +48,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
         id: args.id,
         title: args.title,
         dataStream: args.dataStream,
-        session: args.session,
+        session: args.session
       });
 
       if (args.session?.user?.id) {
@@ -57,7 +57,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
           title: args.title,
           content: draftContent,
           kind: config.kind,
-          userId: args.session.user.id,
+          userId: args.session.user.id
         });
       }
 
@@ -68,7 +68,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
         document: args.document,
         description: args.description,
         dataStream: args.dataStream,
-        session: args.session,
+        session: args.session
       });
 
       if (args.session?.user?.id) {
@@ -77,12 +77,12 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
           title: args.document.title,
           content: draftContent,
           kind: config.kind,
-          userId: args.session.user.id,
+          userId: args.session.user.id
         });
       }
 
       return;
-    },
+    }
   };
 }
 
@@ -93,7 +93,7 @@ export const documentHandlersByArtifactKind: Array<DocumentHandler> = [
   textDocumentHandler,
   codeDocumentHandler,
   imageDocumentHandler,
-  sheetDocumentHandler,
+  sheetDocumentHandler
 ];
 
 export const artifactKinds = ['text', 'code', 'image', 'sheet'] as const;

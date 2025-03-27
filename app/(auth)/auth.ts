@@ -14,7 +14,7 @@ export const {
   handlers: { GET, POST },
   auth,
   signIn,
-  signOut,
+  signOut
 } = NextAuth({
   ...authConfig,
   providers: [
@@ -27,8 +27,8 @@ export const {
         const passwordsMatch = await compare(password, users[0].password!);
         if (!passwordsMatch) return null;
         return users[0] as any;
-      },
-    }),
+      }
+    })
   ],
   callbacks: {
     async jwt({ token, user }) {
@@ -38,18 +38,12 @@ export const {
 
       return token;
     },
-    async session({
-      session,
-      token,
-    }: {
-      session: ExtendedSession;
-      token: any;
-    }) {
+    async session({ session, token }: { session: ExtendedSession; token: any }) {
       if (session.user) {
         session.user.id = token.id as string;
       }
 
       return session;
-    },
-  },
+    }
+  }
 });

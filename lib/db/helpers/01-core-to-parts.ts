@@ -1,18 +1,12 @@
 import { config } from 'dotenv';
 import postgres from 'postgres';
-import {
-  chat,
-  message,
-  messageDeprecated,
-  vote,
-  voteDeprecated,
-} from '../schema';
+import { chat, message, messageDeprecated, vote, voteDeprecated } from '../schema';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { inArray } from 'drizzle-orm';
-import { appendResponseMessages, UIMessage } from 'ai';
+import { appendResponseMessages, type UIMessage } from 'ai';
 
 config({
-  path: '.env.local',
+  path: '.env.local'
 });
 
 if (!process.env.POSTGRES_URL) {
@@ -105,8 +99,8 @@ async function createNewTable() {
             // @ts-expect-error: message.content has different type
             responseMessages: assistantMessages,
             _internal: {
-              currentDate: () => firstAssistantMessage.createdAt ?? new Date(),
-            },
+              currentDate: () => firstAssistantMessage.createdAt ?? new Date()
+            }
           });
 
           const projectedUISection = uiSection
@@ -118,7 +112,7 @@ async function createNewTable() {
                   parts: [{ type: 'text', text: message.content }],
                   role: message.role,
                   createdAt: message.createdAt,
-                  attachments: [],
+                  attachments: []
                 } as NewMessageInsert;
               } else if (message.role === 'assistant') {
                 return {
@@ -127,7 +121,7 @@ async function createNewTable() {
                   parts: message.parts || [],
                   role: message.role,
                   createdAt: message.createdAt,
-                  attachments: [],
+                  attachments: []
                 } as NewMessageInsert;
               }
               return null;
@@ -144,7 +138,7 @@ async function createNewTable() {
                 newVotesToInsert.push({
                   messageId: msg.id,
                   chatId: msg.chatId,
-                  isUpvoted: voteByMessage.isUpvoted,
+                  isUpvoted: voteByMessage.isUpvoted
                 });
               }
             }
@@ -166,7 +160,7 @@ async function createNewTable() {
           parts: msg.parts,
           role: msg.role,
           attachments: msg.attachments,
-          createdAt: msg.createdAt,
+          createdAt: msg.createdAt
         }));
 
         await db.insert(message).values(validMessageBatch);

@@ -6,7 +6,7 @@ import { python } from '@codemirror/lang-python';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { basicSetup } from 'codemirror';
 import React, { memo, useEffect, useRef } from 'react';
-import { Suggestion } from '@/lib/db/schema';
+import type { Suggestion } from '@/lib/db/schema';
 
 type EditorProps = {
   content: string;
@@ -25,12 +25,12 @@ function PureCodeEditor({ content, onSaveContent, status }: EditorProps) {
     if (containerRef.current && !editorRef.current) {
       const startState = EditorState.create({
         doc: content,
-        extensions: [basicSetup, python(), oneDark],
+        extensions: [basicSetup, python(), oneDark]
       });
 
       editorRef.current = new EditorView({
         state: startState,
-        parent: containerRef.current,
+        parent: containerRef.current
       });
     }
 
@@ -48,9 +48,7 @@ function PureCodeEditor({ content, onSaveContent, status }: EditorProps) {
     if (editorRef.current) {
       const updateListener = EditorView.updateListener.of((update) => {
         if (update.docChanged) {
-          const transaction = update.transactions.find(
-            (tr) => !tr.annotation(Transaction.remote),
-          );
+          const transaction = update.transactions.find((tr) => !tr.annotation(Transaction.remote));
 
           if (transaction) {
             const newContent = update.state.doc.toString();
@@ -64,7 +62,7 @@ function PureCodeEditor({ content, onSaveContent, status }: EditorProps) {
       const newState = EditorState.create({
         doc: editorRef.current.state.doc,
         extensions: [basicSetup, python(), oneDark, updateListener],
-        selection: currentSelection,
+        selection: currentSelection
       });
 
       editorRef.current.setState(newState);
@@ -80,9 +78,9 @@ function PureCodeEditor({ content, onSaveContent, status }: EditorProps) {
           changes: {
             from: 0,
             to: currentContent.length,
-            insert: content,
+            insert: content
           },
-          annotations: [Transaction.remote.of(true)],
+          annotations: [Transaction.remote.of(true)]
         });
 
         editorRef.current.dispatch(transaction);
@@ -90,21 +88,14 @@ function PureCodeEditor({ content, onSaveContent, status }: EditorProps) {
     }
   }, [content, status]);
 
-  return (
-    <div
-      className="relative not-prose w-full pb-[calc(80dvh)] text-sm"
-      ref={containerRef}
-    />
-  );
+  return <div className="not-prose relative w-full pb-[calc(80dvh)] text-sm" ref={containerRef} />;
 }
 
 function areEqual(prevProps: EditorProps, nextProps: EditorProps) {
   if (prevProps.suggestions !== nextProps.suggestions) return false;
-  if (prevProps.currentVersionIndex !== nextProps.currentVersionIndex)
-    return false;
+  if (prevProps.currentVersionIndex !== nextProps.currentVersionIndex) return false;
   if (prevProps.isCurrentVersion !== nextProps.isCurrentVersion) return false;
-  if (prevProps.status === 'streaming' && nextProps.status === 'streaming')
-    return false;
+  if (prevProps.status === 'streaming' && nextProps.status === 'streaming') return false;
   if (prevProps.content !== nextProps.content) return false;
 
   return true;

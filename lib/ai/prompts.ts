@@ -1,4 +1,4 @@
-import { ArtifactKind } from '@/components/artifact';
+import type { ArtifactKind } from '@/components/artifact';
 
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
@@ -25,6 +25,15 @@ This is a guide for using artifacts tools: \`createDocument\` and \`updateDocume
 - Use targeted updates only for specific, isolated changes
 - Follow user instructions for which parts to modify
 
+## Using the think tool
+
+Before taking any action or responding to the user after receiving tool results, use the think tool as a scratchpad to:
+- List the specific rules that apply to the current request
+- Check if all required information is collected
+- Verify that the planned action complies with all policies
+- Iterate over tool results for correctness 
+
+
 **When NOT to use \`updateDocument\`:**
 - Immediately after creating a document
 
@@ -32,13 +41,9 @@ Do not update document right after creating it. Wait for user feedback or reques
 `;
 
 export const regularPrompt =
-  'You are a friendly assistant! Keep your responses concise and helpful.';
+  'You are a friendly assistant! Keep your responses concise and helpful. When needed, you may use search tools to retrieve up-to-date information from the web to better assist with questions.';
 
-export const systemPrompt = ({
-  selectedChatModel,
-}: {
-  selectedChatModel: string;
-}) => {
+export const systemPrompt = ({ selectedChatModel }: { selectedChatModel: string }) => {
   if (selectedChatModel === 'chat-model-reasoning') {
     return regularPrompt;
   } else {
@@ -78,10 +83,7 @@ export const sheetPrompt = `
 You are a spreadsheet creation assistant. Create a spreadsheet in csv format based on the given prompt. The spreadsheet should contain meaningful column headers and data.
 `;
 
-export const updateDocumentPrompt = (
-  currentContent: string | null,
-  type: ArtifactKind,
-) =>
+export const updateDocumentPrompt = (currentContent: string | null, type: ArtifactKind) =>
   type === 'text'
     ? `\
 Improve the following contents of the document based on the given prompt.

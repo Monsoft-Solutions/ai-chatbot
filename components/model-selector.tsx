@@ -8,26 +8,27 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { chatModels } from '@/lib/ai/models';
 import { cn } from '@/lib/utils';
 
-import { CheckCircleFillIcon, ChevronDownIcon } from './icons';
+import { CheckCircleFillIcon, ChevronDownIcon, SparklesIcon } from './icons';
 
 export function ModelSelector({
   selectedModelId,
   className,
+  minimal = false
 }: {
   selectedModelId: string;
+  minimal?: boolean;
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
-  const [optimisticModelId, setOptimisticModelId] =
-    useOptimistic(selectedModelId);
+  const [optimisticModelId, setOptimisticModelId] = useOptimistic(selectedModelId);
 
   const selectedChatModel = useMemo(
     () => chatModels.find((chatModel) => chatModel.id === optimisticModelId),
-    [optimisticModelId],
+    [optimisticModelId]
   );
 
   return (
@@ -36,19 +37,30 @@ export function ModelSelector({
         asChild
         className={cn(
           'w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
-          className,
+          className
         )}
       >
         <Button
           data-testid="model-selector"
-          variant="outline"
-          className="md:px-2 md:h-[34px]"
+          variant={minimal ? 'ghost' : 'outline'}
+          size={minimal ? 'sm' : 'default'}
+          className={cn(minimal ? 'h-8 p-2' : 'md:h-[34px] md:px-2')}
+          title="Select AI model"
         >
-          {selectedChatModel?.name}
-          <ChevronDownIcon />
+          {minimal ? (
+            <div className="flex items-center">
+              <SparklesIcon size={14} />
+              <span className="ml-1 text-xs">{selectedChatModel?.name}</span>
+            </div>
+          ) : (
+            <>
+              {selectedChatModel?.name}
+              <ChevronDownIcon />
+            </>
+          )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[300px]">
+      <DropdownMenuContent align="end" className="min-w-[220px]">
         {chatModels.map((chatModel) => {
           const { id } = chatModel;
 
@@ -69,16 +81,14 @@ export function ModelSelector({
             >
               <button
                 type="button"
-                className="gap-4 group/item flex flex-row justify-between items-center w-full"
+                className="group/item flex w-full flex-row items-center justify-between gap-4"
               >
-                <div className="flex flex-col gap-1 items-start">
+                <div className="flex flex-col items-start gap-1">
                   <div>{chatModel.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {chatModel.description}
-                  </div>
+                  <div className="text-xs text-muted-foreground">{chatModel.description}</div>
                 </div>
 
-                <div className="text-foreground dark:text-foreground opacity-0 group-data-[active=true]/item:opacity-100">
+                <div className="text-foreground opacity-0 group-data-[active=true]/item:opacity-100 dark:text-foreground">
                   <CheckCircleFillIcon />
                 </div>
               </button>
