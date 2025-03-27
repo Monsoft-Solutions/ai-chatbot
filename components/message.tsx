@@ -20,6 +20,8 @@ import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { SearchResults } from './search-results';
+import { ThinkingToolResult } from './thinking-tool-result';
+import { ThinkingToolCall } from './thinking-tool-call';
 
 const PurePreviewMessage = ({
   chatId,
@@ -163,6 +165,8 @@ const PurePreviewMessage = ({
                           args={args}
                           isReadonly={isReadonly}
                         />
+                      ) : toolName === 'think' ? (
+                        <ThinkingToolCall args={args} />
                       ) : null}
                     </div>
                   );
@@ -187,6 +191,8 @@ const PurePreviewMessage = ({
                         />
                       ) : toolName === 'search_the_web' ? (
                         <SearchResults searchResults={result} />
+                      ) : toolName === 'think' ? (
+                        <ThinkingToolResult result={result} />
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
