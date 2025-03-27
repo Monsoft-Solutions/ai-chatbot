@@ -42,6 +42,12 @@ export function Chat({
       },
       onError: () => {
         toast.error('An error occured, please try again!');
+      },
+      onToolCall: (toolCall) => {
+        console.log(`toolCall: ${JSON.stringify(toolCall)}`);
+      },
+      onResponse: (response) => {
+        console.log(`response: ${JSON.stringify(response)}`);
       }
     });
 

@@ -16,6 +16,7 @@ import { Button } from './ui/button';
 import { ChevronDownIcon, ExternalLinkIcon } from './icons';
 import { useSearch } from '@/hooks/use-search';
 import { Progress } from '@/components/ui/progress';
+import { SearchStepIndicator } from './search-step-indicator';
 
 export function SearchResults({ searchResults }: { searchResults?: SearchResults }) {
   const { steps, status, query, results } = useSearch();
@@ -44,34 +45,7 @@ export function SearchResults({ searchResults }: { searchResults?: SearchResults
 
   // Loading state
   if (isSearching && !displayResults) {
-    return (
-      <div className="w-full rounded-lg border p-4">
-        <div className="mb-4 flex items-center gap-2">
-          <div className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <div>
-            <span className="text-sm font-medium">Searching...</span>
-          </div>
-        </div>
-
-        {query && (
-          <div className="mb-3 flex items-center text-sm text-muted-foreground">
-            <span className="mr-2">Query:</span>
-            <code className="rounded bg-muted px-2 py-1">{query}</code>
-          </div>
-        )}
-
-        <Progress value={searchProgress} className="h-1 w-full" />
-      </div>
-    );
+    return <SearchStepIndicator />;
   }
 
   return (

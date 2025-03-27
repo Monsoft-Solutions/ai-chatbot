@@ -6,6 +6,8 @@ import { memo } from 'react';
 import type { Vote } from '@/lib/db/schema';
 import equal from 'fast-deep-equal';
 import type { UseChatHelpers } from '@ai-sdk/react';
+import { SearchStepIndicator } from './search-step-indicator';
+import { useSearch } from '@/hooks/use-search';
 
 interface MessagesProps {
   chatId: string;
@@ -28,6 +30,14 @@ function PureMessages({
   isReadonly
 }: MessagesProps) {
   const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();
+  const { status: searchStatus } = useSearch();
+
+  // Show thinking indicator when waiting for a response or during search
+  const showThinking =
+    status === 'submitted' && messages.length > 0 && messages[messages.length - 1].role === 'user';
+
+  // Show search steps whenever we're in search process (not just at submitted state)
+  const isSearchActive = searchStatus === 'starting' || searchStatus === 'searching';
 
   return (
     <div
@@ -49,9 +59,11 @@ function PureMessages({
         />
       ))}
 
-      {status === 'submitted' &&
-        messages.length > 0 &&
-        messages[messages.length - 1].role === 'user' && <ThinkingMessage />}
+      {/* Show search indicator whenever search is active */}
+      {isSearchActive && <SearchStepIndicator />}
+
+      {/* Show thinking indicator when appropriate */}
+      {showThinking && <ThinkingMessage />}
 
       <div ref={messagesEndRef} className="min-h-[24px] min-w-[24px] shrink-0" />
     </div>

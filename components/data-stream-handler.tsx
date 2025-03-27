@@ -30,9 +30,18 @@ export type DataStreamDelta = {
 export function DataStreamHandler({ id }: { id: string }) {
   const { data: dataStream } = useChat({ id });
   const { artifact, setArtifact, setMetadata } = useArtifact();
-  const { setSearchStatus, setSearchQuery, addSearchStep, resetSearch, setSearchError } =
-    useSearch();
+  const {
+    setSearchStatus,
+    setSearchQuery,
+    addSearchStep,
+    resetSearch,
+    setSearchError,
+    status: searchStatus
+  } = useSearch();
+
   const lastProcessedIndex = useRef(-1);
+  // Track if a tool call is in progress
+  const searchToolInProgress = useRef(false);
 
   useEffect(() => {
     if (!dataStream?.length) return;
@@ -42,38 +51,61 @@ export function DataStreamHandler({ id }: { id: string }) {
 
     (newDeltas as DataStreamDelta[]).forEach((delta: DataStreamDelta) => {
       // Handle search-related stream data
+      console.log(`delta: ${JSON.stringify(delta)}`);
+      console.log(`delta.type: ${delta.type}`);
+
+      // Check if a tool call is starting
       if (delta.type === 'search-status') {
         const status = delta.content as string;
         if (status === 'starting') {
+          // Reset search state at start of new search
           resetSearch();
+          searchToolInProgress.current = true;
+        } else if (status === 'completed' || status === 'error') {
+          // Mark search as no longer in progress
+          searchToolInProgress.current = false;
         }
+
+        // Update search status in store
         setSearchStatus(status);
         return;
       }
 
-      if (delta.type === 'search-query') {
-        setSearchQuery(delta.content as string);
-        return;
-      }
-
-      if (delta.type === 'search-step') {
-        try {
-          const step = JSON.parse(delta.content as string) as SearchStep;
-          addSearchStep(step);
-        } catch (error) {
-          console.error('Failed to parse search step', error);
+      // Only process search-related updates if we're in an active search
+      // or we have received a 'starting' status recently
+      if (searchToolInProgress.current || searchStatus !== 'idle') {
+        if (delta.type === 'search-query') {
+          console.log(`search-query: ${delta.content}`);
+          setSearchQuery(delta.content as string);
+          return;
         }
-        return;
-      }
 
-      if (delta.type === 'search-error') {
-        try {
-          const error = JSON.parse(delta.content as string);
-          setSearchError(error.message);
-        } catch (error) {
-          setSearchError('Unknown search error');
+        if (delta.type === 'search-step') {
+          console.log(`search-step: ${delta.content}`);
+          try {
+            const step = JSON.parse(delta.content as string) as SearchStep;
+            // Set status to searching when we're receiving steps
+            if (searchStatus === 'idle' || searchStatus === 'starting') {
+              setSearchStatus('searching');
+            }
+            addSearchStep(step);
+          } catch (error) {
+            console.error('Failed to parse search step', error);
+          }
+          return;
         }
-        return;
+
+        if (delta.type === 'search-error') {
+          try {
+            const error = JSON.parse(delta.content as string);
+            setSearchError(error.message);
+            searchToolInProgress.current = false;
+          } catch (error) {
+            setSearchError('Unknown search error');
+            searchToolInProgress.current = false;
+          }
+          return;
+        }
       }
 
       // Handle artifact-related stream data
@@ -143,7 +175,8 @@ export function DataStreamHandler({ id }: { id: string }) {
     setSearchQuery,
     addSearchStep,
     resetSearch,
-    setSearchError
+    setSearchError,
+    searchStatus
   ]);
 
   return null;

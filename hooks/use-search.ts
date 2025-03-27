@@ -22,7 +22,7 @@ interface SearchState {
   resetSearch: () => void;
 }
 
-export const useSearch = create<SearchState>((set) => ({
+export const useSearch = create<SearchState>((set, get) => ({
   status: 'idle',
   query: '',
   steps: [],
@@ -31,6 +31,7 @@ export const useSearch = create<SearchState>((set) => ({
 
   setSearchStatus: (status: string) => {
     let newStatus: SearchStatus = 'idle';
+    console.log(`Setting search status: ${status}`);
 
     switch (status) {
       case 'starting':
@@ -49,12 +50,33 @@ export const useSearch = create<SearchState>((set) => ({
         newStatus = 'idle';
     }
 
-    set({ status: newStatus });
+    // Only update if status is actually changing
+    if (get().status !== newStatus) {
+      console.log(`Updating search status from ${get().status} to ${newStatus}`);
+      set({ status: newStatus });
+    }
   },
 
-  setSearchQuery: (query: string) => set({ query }),
+  setSearchQuery: (query: string) => {
+    console.log(`Setting search query: ${query}`);
+    set({ query });
 
-  addSearchStep: (step: SearchStep) =>
+    // When we set a query and status is idle, update to starting
+    const currentStatus = get().status;
+    if (currentStatus === 'idle') {
+      get().setSearchStatus('starting');
+    }
+  },
+
+  addSearchStep: (step: SearchStep) => {
+    console.log(`Adding/updating search step: ${step.title}`);
+
+    // If we're adding steps, ensure status reflects we're searching
+    const currentStatus = get().status;
+    if (currentStatus === 'idle' || currentStatus === 'starting') {
+      get().setSearchStatus('searching');
+    }
+
     set((state) => {
       const existingIndex = state.steps.findIndex((s) => s.title === step.title);
 
@@ -67,10 +89,12 @@ export const useSearch = create<SearchState>((set) => ({
         // Add new step
         return { steps: [...state.steps, step] };
       }
-    }),
+    });
+  },
 
   updateSearchStep: (index: number, stepUpdates: Partial<SearchStep>) =>
     set((state) => {
+      console.log(`Updating search step at index: ${index}`);
       if (index < 0 || index >= state.steps.length) return state;
 
       const newSteps = [...state.steps];
@@ -79,16 +103,35 @@ export const useSearch = create<SearchState>((set) => ({
       return { steps: newSteps };
     }),
 
-  setSearchResults: (results: SearchResults) => set({ results }),
+  setSearchResults: (results: SearchResults) => {
+    console.log(`Setting search results with ${results.results?.length || 0} items`);
 
-  setSearchError: (error: string) => set({ error, status: 'error' }),
+    // If we have results and no completion status, mark as completed
+    const currentStatus = get().status;
+    if (
+      results?.results?.length > 0 &&
+      currentStatus !== 'completed' &&
+      currentStatus !== 'error'
+    ) {
+      get().setSearchStatus('completed');
+    }
 
-  resetSearch: () =>
+    set({ results });
+  },
+
+  setSearchError: (error: string) => {
+    console.log(`Setting search error: ${error}`);
+    set({ error, status: 'error' });
+  },
+
+  resetSearch: () => {
+    console.log('Resetting search state');
     set({
       status: 'idle',
       query: '',
       steps: [],
       error: null,
       results: null
-    })
+    });
+  }
 }));
