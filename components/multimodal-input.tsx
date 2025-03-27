@@ -71,7 +71,7 @@ function PureMultimodalInput({
   const adjustHeight = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight + 2}px`;
+      textareaRef.current.style.height = `${Math.max(textareaRef.current.scrollHeight + 2, 98)}px`;
     }
   };
 
@@ -160,6 +160,8 @@ function PureMultimodalInput({
     formData.append('file', file);
 
     try {
+      console.log('Uploading file:', file.name, 'type:', file.type, 'size:', file.size);
+
       const response = await fetch('/api/files/upload', {
         method: 'POST',
         body: formData
@@ -168,41 +170,75 @@ function PureMultimodalInput({
       if (response.ok) {
         const data = await response.json();
         const { url, pathname, contentType } = data;
+        console.log('File uploaded successfully:', url);
 
         return {
           url,
           name: pathname,
           contentType: contentType
-        };
+        } as Attachment;
       }
-      const { error } = await response.json();
-      toast.error(error);
+
+      // Handle error responses
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: 'Failed to parse error response' }));
+      const errorMessage = errorData.details || errorData.error || 'Unknown error occurred during upload';
+      console.error('Upload error:', errorMessage);
+      toast.error(errorMessage);
+      return undefined;
     } catch (error) {
+      console.error('Failed to upload file:', error);
       toast.error('Failed to upload file, please try again!');
+      return undefined;
     }
   };
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(event.target.files || []);
+      if (files.length === 0) {
+        console.log('No files selected');
+        return;
+      }
 
+      console.log(
+        'Selected files:',
+        files.map((f) => `${f.name} (${f.type})`)
+      );
       setUploadQueue(files.map((file) => file.name));
 
       try {
         const uploadPromises = files.map((file) => uploadFile(file));
         const uploadedAttachments = await Promise.all(uploadPromises);
         const successfullyUploadedAttachments = uploadedAttachments.filter(
-          (attachment) => attachment !== undefined
+          (attachment): attachment is Attachment => attachment !== undefined
         );
+
+        console.log('Successfully uploaded attachments:', successfullyUploadedAttachments.length);
+
+        if (successfullyUploadedAttachments.length === 0) {
+          toast.error('No files were uploaded successfully');
+        } else if (successfullyUploadedAttachments.length < files.length) {
+          toast.warning(
+            `${successfullyUploadedAttachments.length} of ${files.length} files uploaded successfully`
+          );
+        } else {
+          toast.success('All files uploaded successfully');
+        }
 
         setAttachments((currentAttachments) => [
           ...currentAttachments,
           ...successfullyUploadedAttachments
         ]);
       } catch (error) {
-        console.error('Error uploading files!', error);
+        console.error('Error handling file uploads:', error);
+        toast.error('Failed to process uploads. Please try again!');
       } finally {
         setUploadQueue([]);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       }
     },
     [setAttachments]
@@ -258,10 +294,10 @@ function PureMultimodalInput({
           value={input}
           onChange={handleInput}
           className={cx(
-            'max-h-[calc(75dvh)] min-h-[48px] resize-none overflow-hidden rounded-xl bg-muted pb-3 pl-12 pr-24 pt-3 !text-base dark:border-zinc-700',
+            'max-h-[calc(75dvh)] min-h-[98px] resize-none overflow-hidden rounded-xl bg-muted pb-12 pl-5 pr-32 pt-3 !text-base dark:border-zinc-700',
             className
           )}
-          rows={1}
+          rows={3}
           autoFocus
           onKeyDown={(event) => {
             if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -276,7 +312,7 @@ function PureMultimodalInput({
           }}
         />
 
-        <div className="absolute bottom-1 left-2">
+        <div className="absolute bottom-3 left-3 flex items-center space-x-1">
           <AttachmentsButton
             className="size-8 rounded-full p-0 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
             disabled={status !== 'ready'}
@@ -287,14 +323,13 @@ function PureMultimodalInput({
             }}
             iconSize={16}
           />
-        </div>
 
-        <div className="absolute bottom-1 right-2 flex items-center space-x-1">
           <div className="flex items-center gap-1.5">
             <SearchOptionsSelector minimal={true} />
             <ModelSelector selectedModelId={selectedModelId} minimal={true} />
           </div>
-
+        </div>
+        <div className="absolute bottom-3 right-3 flex items-center space-x-1">
           {status === 'streaming' ? (
             <StopButton
               className="size-8 rounded-full bg-zinc-100 p-0 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
@@ -304,10 +339,8 @@ function PureMultimodalInput({
           ) : (
             <SendButton
               className={cx('size-8 rounded-full p-0', {
-                'bg-primary text-white hover:bg-primary/90 dark:bg-primary dark:text-white dark:hover:bg-primary/90':
-                  !searchOption || searchOption === 'none',
-                'bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700':
-                  searchOption && searchOption !== 'none',
+                'bg-primary text-black ': !searchOption || searchOption === 'none',
+                'bg-green-600 text-black ': searchOption && searchOption !== 'none',
                 'opacity-50': input.trim().length === 0 || status !== 'ready'
               })}
               disabled={input.trim().length === 0 || status !== 'ready'}
@@ -343,7 +376,7 @@ function PureAttachmentsButton({
   iconSize: number;
 }) {
   return (
-    <Button className={className} disabled={disabled} onClick={onClick} variant="ghost">
+    <Button className={className} disabled={disabled} onClick={onClick} variant="ghost" type="button">
       <PaperclipIcon size={iconSize} />
     </Button>
   );
@@ -361,7 +394,7 @@ function PureStopButton({
   iconSize: number;
 }) {
   return (
-    <Button className={className} onClick={onClick} variant="ghost">
+    <Button className={className} onClick={onClick} variant="ghost" type="button">
       <StopIcon size={iconSize} />
     </Button>
   );
@@ -383,7 +416,7 @@ function PureSendButton({
   iconSize: number;
 }) {
   return (
-    <Button className={className} disabled={disabled} onClick={onClick} variant="ghost">
+    <Button className={className} disabled={disabled} onClick={onClick} variant="ghost" type="button">
       <ArrowUpIcon size={iconSize} />
     </Button>
   );

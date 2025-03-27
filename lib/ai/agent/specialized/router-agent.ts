@@ -68,7 +68,7 @@ export class RouterAgent extends BaseAgent {
       id: 'router',
       name: 'Router Agent',
       description: 'Determines which specialized agent to handle the request',
-      model: 'chat-model',
+      model: 'fast-model',
       systemPrompt,
       tools: {
         think: thinkTool

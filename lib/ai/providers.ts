@@ -20,7 +20,7 @@ export const myProvider = isTestEnvironment
           model: openai('o1-mini'),
           middleware: extractReasoningMiddleware({ tagName: 'think' })
         }),
-        'title-model': openai('gpt-4o-mini'),
+        'fast-model': openai('gpt-4o-mini'),
         'artifact-model': openai('gpt-4o')
       },
       imageModels: {
