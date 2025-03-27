@@ -1,23 +1,13 @@
 import {
   type UIMessage,
   appendResponseMessages,
-  createDataStreamResponse,
-  smoothStream,
-  streamText
+  createDataStreamResponse
 } from 'ai';
 import { auth } from '@/app/(auth)/auth';
-import { systemPrompt } from '@/lib/ai/prompts';
 import { deleteChatById, getChatById, saveChat, saveMessages } from '@/lib/db/queries';
 import { generateUUID, getMostRecentUserMessage, getTrailingMessageId } from '@/lib/utils';
 import { generateTitleFromUserMessage } from '../../actions';
-import { createDocument } from '@/lib/ai/tools/create-document';
-import { updateDocument } from '@/lib/ai/tools/update-document';
-import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
-import { getWeather } from '@/lib/ai/tools/get-weather';
-import { isProductionEnvironment } from '@/lib/constants';
-import { myProvider } from '@/lib/ai/providers';
-import { searchTool } from '@/lib/ai/tools/search.ai-tool';
-import { thinkTool } from '@/lib/ai/tools/think.ai-tool';
+import { AgentService } from '@/lib/ai/agent/agent-service';
 
 export const maxDuration = 60;
 
@@ -26,11 +16,13 @@ export async function POST(request: Request) {
     const {
       id,
       messages,
-      selectedChatModel
+      selectedChatModel,
+      selectedAgentId
     }: {
       id: string;
       messages: Array<UIMessage>;
       selectedChatModel: string;
+      selectedAgentId?: string;
     } = await request.json();
 
     const session = await auth();
@@ -72,91 +64,65 @@ export async function POST(request: Request) {
       ]
     });
 
+    // Create a proxy DataStreamWriter to capture assistant messages
+    let assistantMessage: UIMessage | null = null;
+    
     return createDataStreamResponse({
-      execute: (dataStream) => {
+      execute: async (dataStream) => {
         console.log(`Executing chat with model: ${selectedChatModel}`);
-        console.log('messages', messages);
-        const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel }),
-          messages,
-          maxSteps: 10,
-          experimental_activeTools:
-            selectedChatModel === 'chat-model-reasoning'
-              ? []
-              : [
-                  'getWeather',
-                  // 'createDocument',
-                  // 'updateDocument',
-                  'requestSuggestions',
-                  'search_the_web',
-                  'think'
-                ],
-          experimental_transform: smoothStream({ chunking: 'word' }),
-          experimental_generateMessageId: generateUUID,
-          tools: {
-            getWeather,
-            createDocument: createDocument({ session, dataStream }),
-            updateDocument: updateDocument({ session, dataStream }),
-            requestSuggestions: requestSuggestions({
-              session,
-              dataStream
-            }),
-            search_the_web: searchTool({ session, dataStream }),
-            think: thinkTool
-          },
-          toolCallStreaming: true,
-          onFinish: async ({ response }) => {
-            if (session.user?.id) {
-              try {
-                const assistantId = getTrailingMessageId({
-                  messages: response.messages.filter((message) => message.role === 'assistant')
-                });
-
-                if (!assistantId) {
-                  throw new Error('No assistant message found!');
-                }
-
-                const [, assistantMessage] = appendResponseMessages({
-                  messages: [userMessage],
-                  responseMessages: response.messages
-                });
-
-                await saveMessages({
-                  messages: [
-                    {
-                      id: assistantId,
-                      chatId: id,
-                      role: assistantMessage.role,
-                      parts: assistantMessage.parts,
-                      attachments: assistantMessage.experimental_attachments ?? [],
-                      createdAt: new Date()
-                    }
-                  ]
-                });
-              } catch (_) {
-                console.error('Failed to save chat');
-              }
+        
+        // Create a proxy for the dataStream that captures relevant messages
+        const proxyDataStream = {
+          ...dataStream,
+          writeData: (data: any) => {
+            // Capture assistant message if it exists
+            if (data && data.type === 'assistant_message' && data.message) {
+              assistantMessage = data.message as UIMessage;
+              console.log('Captured assistant message:', assistantMessage.id);
             }
-          },
-          experimental_telemetry: {
-            isEnabled: isProductionEnvironment,
-            functionId: 'stream-text'
+            
+            // Forward to the original dataStream
+            return dataStream.writeData(data);
           }
+        };
+        
+        // Initialize the agent service with the proxy dataStream
+        const agentService = new AgentService({
+          session,
+          dataStream: proxyDataStream,
+          selectedAgentId
         });
-
-        result.consumeStream();
-
-        result.mergeIntoDataStream(dataStream, {
-          sendReasoning: true
-        });
+        
+        // Process the messages with the appropriate agent
+        await agentService.processMessages(messages);
+        
+        // Save the assistant message if we captured one
+        if (session.user?.id && assistantMessage) {
+          try {
+            await saveMessages({
+              messages: [
+                {
+                  id: assistantMessage.id || generateUUID(),
+                  chatId: id,
+                  role: 'assistant',
+                  parts: assistantMessage.parts,
+                  attachments: assistantMessage.experimental_attachments ?? [],
+                  createdAt: new Date()
+                }
+              ]
+            });
+          } catch (error) {
+            console.error('Failed to save assistant message', error);
+          }
+        }
       },
-      onError: () => {
-        return 'Oops, an error occured!';
+      onError: (error) => {
+        console.error('Error in chat processing', error);
+        return 'Oops, an error occurred!';
       }
     });
   } catch (error) {
-    console.error(`Error While processig the request`, error);
+    console.error(`Error while processing the request`, error);
     return new Response('An error occurred while processing your request!', {
       status: 500
     });

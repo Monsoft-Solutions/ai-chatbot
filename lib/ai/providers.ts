@@ -17,11 +17,11 @@ export const myProvider = isTestEnvironment
       languageModels: {
         'chat-model': anthropic('claude-3-7-sonnet-latest'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: anthropic('claude-3-7-sonnet-latest'),
+          model: openai('o1-mini'),
           middleware: extractReasoningMiddleware({ tagName: 'think' })
         }),
-        'title-model': anthropic('claude-3-haiku-20240307'),
-        'artifact-model': anthropic('claude-3-7-sonnet-latest')
+        'title-model': openai('gpt-4o-mini'),
+        'artifact-model': openai('gpt-4o')
       },
       imageModels: {
         'small-model': openai.image('dall-e-3')
