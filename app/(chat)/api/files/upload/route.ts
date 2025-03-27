@@ -72,20 +72,23 @@ export async function POST(request: Request) {
     } catch (error) {
       console.error('Vercel Blob upload error:', error);
       // Check if BLOB_READ_WRITE_TOKEN is configured
-      const isBlobTokenConfigured = process.env.BLOB_READ_WRITE_TOKEN && 
-        process.env.BLOB_READ_WRITE_TOKEN !== '****';
-      
+      const isBlobTokenConfigured =
+        process.env.BLOB_READ_WRITE_TOKEN && process.env.BLOB_READ_WRITE_TOKEN !== '****';
+
       if (!isBlobTokenConfigured) {
         return NextResponse.json(
-          { error: 'Blob storage not configured. Please set BLOB_READ_WRITE_TOKEN in .env.local' }, 
+          { error: 'Blob storage not configured. Please set BLOB_READ_WRITE_TOKEN in .env.local' },
           { status: 500 }
         );
       }
-      
-      return NextResponse.json({ 
-        error: 'Upload failed', 
-        details: error instanceof Error ? error.message : 'Unknown error' 
-      }, { status: 500 });
+
+      return NextResponse.json(
+        {
+          error: 'Upload failed',
+          details: error instanceof Error ? error.message : 'Unknown error'
+        },
+        { status: 500 }
+      );
     }
   } catch (error) {
     return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });

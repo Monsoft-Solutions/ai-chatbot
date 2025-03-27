@@ -183,7 +183,8 @@ function PureMultimodalInput({
       const errorData = await response
         .json()
         .catch(() => ({ error: 'Failed to parse error response' }));
-      const errorMessage = errorData.details || errorData.error || 'Unknown error occurred during upload';
+      const errorMessage =
+        errorData.details || errorData.error || 'Unknown error occurred during upload';
       console.error('Upload error:', errorMessage);
       toast.error(errorMessage);
       return undefined;
@@ -376,7 +377,13 @@ function PureAttachmentsButton({
   iconSize: number;
 }) {
   return (
-    <Button className={className} disabled={disabled} onClick={onClick} variant="ghost" type="button">
+    <Button
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+      variant="ghost"
+      type="button"
+    >
       <PaperclipIcon size={iconSize} />
     </Button>
   );
@@ -416,7 +423,13 @@ function PureSendButton({
   iconSize: number;
 }) {
   return (
-    <Button className={className} disabled={disabled} onClick={onClick} variant="ghost" type="button">
+    <Button
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+      variant="ghost"
+      type="button"
+    >
       <ArrowUpIcon size={iconSize} />
     </Button>
   );

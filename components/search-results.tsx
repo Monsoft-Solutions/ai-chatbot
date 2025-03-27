@@ -1,37 +1,27 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Markdown } from './markdown';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-import type {
-  SearchResultImage,
-  SearchResultItem,
-  SearchResults,
-  SearchSourceDetail,
-  SearchStep
-} from '@/lib/types/search.type';
-import { useEffect, useState } from 'react';
-import { Button } from './ui/button';
-import { ChevronDownIcon, ExternalLinkIcon } from './icons';
+import type { SearchResultImage, SearchResultItem, SearchResults } from '@/lib/types/search.type';
+import { useEffect } from 'react';
+import { ExternalLinkIcon } from './icons';
 import { useSearch } from '@/hooks/use-search';
 import { Progress } from '@/components/ui/progress';
 import { SearchStepIndicator } from './search-step-indicator';
 
 export function SearchResults({ searchResults }: { searchResults?: SearchResults }) {
-  const { steps, status, query, results } = useSearch();
+  const { steps, status, query, results, setSearchResults, addSearchStep } = useSearch();
 
   // Initialize state from props or hook
   useEffect(() => {
     if (searchResults) {
-      useSearch.getState().setSearchResults(searchResults);
+      setSearchResults(searchResults);
       if (searchResults.steps) {
-        searchResults.steps.forEach((step) => {
-          useSearch.getState().addSearchStep(step);
-        });
+        searchResults.steps.forEach(addSearchStep);
       }
     }
-  }, [searchResults]);
+  }, [searchResults, setSearchResults, addSearchStep]);
 
   // Determine what to display
   const displayResults = results || searchResults;
