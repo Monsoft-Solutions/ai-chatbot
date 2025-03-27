@@ -32,14 +32,14 @@ export class DocumentAgent extends BaseAgent {
 
     // Add document tools if session exists
     if (context.session && context.dataStream) {
-      tools['createDocument'] = createDocument({ 
-        session: context.session as Session, 
-        dataStream: context.dataStream 
+      tools['createDocument'] = createDocument({
+        session: context.session as Session,
+        dataStream: context.dataStream
       });
-      
-      tools['updateDocument'] = updateDocument({ 
-        session: context.session as Session, 
-        dataStream: context.dataStream 
+
+      tools['updateDocument'] = updateDocument({
+        session: context.session as Session,
+        dataStream: context.dataStream
       });
     }
 
@@ -62,4 +62,4 @@ export class DocumentAgent extends BaseAgent {
 
     super(config, context);
   }
-} 
+}

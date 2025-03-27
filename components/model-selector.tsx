@@ -13,13 +13,15 @@ import {
 import { chatModels } from '@/lib/ai/models';
 import { cn } from '@/lib/utils';
 
-import { CheckCircleFillIcon, ChevronDownIcon } from './icons';
+import { CheckCircleFillIcon, ChevronDownIcon, SparklesIcon } from './icons';
 
 export function ModelSelector({
   selectedModelId,
-  className
+  className,
+  minimal = false
 }: {
   selectedModelId: string;
+  minimal?: boolean;
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
   const [optimisticModelId, setOptimisticModelId] = useOptimistic(selectedModelId);
@@ -38,12 +40,27 @@ export function ModelSelector({
           className
         )}
       >
-        <Button data-testid="model-selector" variant="outline" className="md:h-[34px] md:px-2">
-          {selectedChatModel?.name}
-          <ChevronDownIcon />
+        <Button
+          data-testid="model-selector"
+          variant={minimal ? 'ghost' : 'outline'}
+          size={minimal ? 'sm' : 'default'}
+          className={cn(minimal ? 'h-8 p-2' : 'md:h-[34px] md:px-2')}
+          title="Select AI model"
+        >
+          {minimal ? (
+            <div className="flex items-center">
+              <SparklesIcon size={14} />
+              <span className="ml-1 text-xs">{selectedChatModel?.name}</span>
+            </div>
+          ) : (
+            <>
+              {selectedChatModel?.name}
+              <ChevronDownIcon />
+            </>
+          )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[300px]">
+      <DropdownMenuContent align="end" className="min-w-[220px]">
         {chatModels.map((chatModel) => {
           const { id } = chatModel;
 

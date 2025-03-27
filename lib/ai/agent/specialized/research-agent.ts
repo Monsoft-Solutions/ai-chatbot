@@ -59,11 +59,11 @@ export class ResearchAgent extends BaseAgent {
 
     // Add search tool if session exists
     if (context.session) {
-      const searchToolInstance = searchTool({ 
-        session: context.session as Session, 
-        dataStream: context.dataStream 
+      const searchToolInstance = searchTool({
+        session: context.session as Session,
+        dataStream: context.dataStream
       });
-      
+
       tools['search_the_web'] = searchToolInstance;
     }
 
@@ -86,4 +86,4 @@ export class ResearchAgent extends BaseAgent {
 
     super(config, context);
   }
-} 
+}

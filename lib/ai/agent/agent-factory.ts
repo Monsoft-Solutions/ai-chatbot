@@ -27,9 +27,9 @@ export class AgentFactory {
 
   private updateContext(context: AgentContext): void {
     this.context = context;
-    
+
     // Update context for all existing agents
-    this.agents.forEach(agent => {
+    this.agents.forEach((agent) => {
       agent.updateContext(context);
     });
   }
@@ -39,11 +39,11 @@ export class AgentFactory {
     this.registerAgent(new ChatAgent(this.context));
     this.registerAgent(new ResearchAgent(this.context));
     this.registerAgent(new DocumentAgent(this.context));
-    
+
     // Register router agent last (it needs to know about all other agents)
     const specializedAgents = this.getSpecializedAgents();
     this.registerAgent(new RouterAgent(this.context, specializedAgents));
-    
+
     console.log(`Registered ${this.agents.size} agents:`);
     this.agents.forEach((agent, id) => {
       console.log(`- ${id}: ${agent.getName()}`);
@@ -68,7 +68,7 @@ export class AgentFactory {
 
   public getSpecializedAgents(): BaseAgent[] {
     // Return all agents except the router
-    return Array.from(this.agents.values()).filter(agent => agent.getId() !== 'router');
+    return Array.from(this.agents.values()).filter((agent) => agent.getId() !== 'router');
   }
 
   public async processWithRouter(messages: Message[]): Promise<void> {
@@ -76,4 +76,4 @@ export class AgentFactory {
     const routerAgent = this.getRouterAgent();
     await routerAgent.route(messages);
   }
-} 
+}

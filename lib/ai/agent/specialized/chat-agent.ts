@@ -25,15 +25,10 @@ export class ChatAgent extends BaseAgent {
       tools: {
         think: thinkTool
       },
-      capabilities: [
-        'general-conversation',
-        'basic-qa',
-        'creative-content',
-        'friendly-chat'
-      ],
+      capabilities: ['general-conversation', 'basic-qa', 'creative-content', 'friendly-chat'],
       maxSteps: 3
     };
 
     super(config, context);
   }
-} 
+}

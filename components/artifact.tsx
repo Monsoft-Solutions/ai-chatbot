@@ -318,6 +318,7 @@ function PureArtifact({
                     append={append}
                     className="bg-background dark:bg-muted"
                     setMessages={setMessages}
+                    selectedModelId="chat-model-smart"
                   />
                 </form>
               </div>

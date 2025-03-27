@@ -25,7 +25,7 @@ export type AgentContext = {
 export class BaseAgent {
   protected config: AgentConfig;
   protected context: AgentContext;
-  
+
   constructor(config: AgentConfig, context: AgentContext) {
     this.config = config;
     this.context = context;
@@ -39,7 +39,7 @@ export class BaseAgent {
     if (context.session !== undefined) {
       this.context.session = context.session;
     }
-    
+
     if (context.dataStream !== undefined) {
       this.context.dataStream = context.dataStream;
     }
@@ -69,13 +69,16 @@ export class BaseAgent {
     return Object.keys(this.config.tools);
   }
 
-  public async processMessages(messages: Message[], options?: Partial<Parameters<typeof streamText>[0]>): Promise<void> {
+  public async processMessages(
+    messages: Message[],
+    options?: Partial<Parameters<typeof streamText>[0]>
+  ): Promise<void> {
     if (!this.context.dataStream) {
       throw new Error('DataStream is required for processing messages');
     }
 
     // Prepare a custom agent header message
-    this.context.dataStream.writeData({ 
+    this.context.dataStream.writeData({
       text: `Now processing your request with the ${this.getName()}...`,
       type: 'thinking'
     });
@@ -99,11 +102,11 @@ export class BaseAgent {
     };
 
     console.log(`Processing messages with agent: ${this.config.name}`);
-    
+
     try {
       const result = streamText(callSettings);
       console.log(`Called streamText with model: ${this.config.model}`);
-      
+
       // Consume and merge the stream
       result.consumeStream();
       result.mergeIntoDataStream(this.context.dataStream, {
@@ -111,16 +114,18 @@ export class BaseAgent {
       });
     } catch (error) {
       console.error(`Error processing messages with ${this.config.name}:`, error);
-      
+
       // Provide a fallback response in case of error
       this.context.dataStream.writeData({
         type: 'assistant_message',
         message: {
           id: generateUUID(),
           role: 'assistant',
-          parts: [`I'm sorry, but I encountered an error while processing your request. Please try again later.`]
+          parts: [
+            `I'm sorry, but I encountered an error while processing your request. Please try again later.`
+          ]
         }
       });
     }
   }
-} 
+}
